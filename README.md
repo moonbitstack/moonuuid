@@ -1,59 +1,92 @@
-# CHANGE-ME
+# moonuuid
 
-One sentence saying what this is.
+**UUIDs for MoonBit.** Read every spelling in use, write the canonical one, and make all eight versions of RFC 9562. Time and randomness come from functions you pass in, so the same code runs on every backend and in every test.
 
 ```moonbit
-@lib.greet("moonbit")
+let id = @moonuuid.parse("{C232AB00-9414-11EC-B3C8-9F6BDECED846}")
+id.to_string()   // "c232ab00-9414-11ec-b3c8-9f6bdeced846"
+id.version()     // Some(1)
 ```
 
-Run `moon run examples/tour` for the whole surface in one go.
+---
 
-## Starting from this template
-
-1. `gh repo create moonbitstack/<name> --template moonbitstack/moonkit --public`
-2. Replace `CHANGE-ME` everywhere: `moon.mod` (name and repository), the two
-   `moon.pkg` files that import `lib`, and this file's title.
-3. Delete `bin/` if the repository ships no binary; delete `lib/` if it ships
-   only a binary. Most repositories here keep `lib/` and rename it to whatever
-   the package actually is — `base64/`, `sha2/`, `jwt/` — because a package is
-   named after what it does, not after its role.
-4. Fill in `keywords` and `description` in `moon.mod`. The description is what
-   mooncakes shows, so it says what the package is and what it is not.
-5. Write the specification link into every `moon.pkg`.
-
-## What is here and what is not
-
-| Carried | Why |
-|:--|:--|
-| `.github/workflows/` | GitHub does not inherit workflows; every repository needs its own copy |
-| `moon.mod`, `lib/`, `bin/`, `examples/tour/` | The module layout, with the library and the binary separated the way cargo separates them |
-| `.gitignore`, `.moonignore` | The second one exists because `.gitignore`'s `!.git*` would otherwise pull the whole object database into a published tarball |
-| `LICENSE` | Apache-2.0, the same across the organisation |
-
-**Issue and pull-request templates are not here.** The organisation's `.github`
-repository supplies them to every repository that has none of its own; a copy
-here would shadow that one and then drift from it. A repository adds its own
-only when it needs something the organisation's does not cover.
-
-## The gate
-
-Every commit passes this, with each exit code seen to be zero:
+## Install
 
 ```bash
-moon clean && moon fmt && moon check --target all --deny-warn \
-  && moon build --target all && moon test --target all
+moon add moonbitstack/moonuuid
 ```
 
-Before a release, `moon info --target all && git diff --exit-code` as well: the
-generated interface is checked in, and a difference means the interface moved
-without anyone saying so.
+## Quick start
 
-## Releasing
+```moonbit
+// Name-based ids are the same every time.
+let page = @moonuuid.v5(@moonuuid.namespace_url, "https://example.org/")
 
-Push a signed tag `v<version>`. `release.yml` runs the tests first and publishes
-only if they pass and the organisation variable `MOONCAKES_PUBLISH` is `true`.
-The major version stays at 0.
+// Time-ordered ids from a generator over your clock and randomness.
+let gen = @moonuuid.Generator::new(
+  clock=() => now_in_nanoseconds(),
+  random=n => system_random_bytes(n),
+)
+let row = gen.v7()   // sorts in the order made, even within one millisecond
+```
+
+## The versions
+
+| Version | Made from | Function | Sorts by time |
+|:--:|:--|:--|:--:|
+| 1 | timestamp, clock sequence, node | `v1(ticks~, clock_seq~, node~)` · `gen.v1(node~)` | |
+| 3 | MD5 of a namespace and a name | `v3(space, name)` | |
+| 4 | 122 random bits | `v4(random)` · `gen.v4()` | |
+| 5 | SHA-1 of a namespace and a name | `v5(space, name)` | |
+| 6 | version 1's fields, high time bits first | `v6(ticks~, clock_seq~, node~)` · `gen.v6(node~)` | ✓ |
+| 7 | Unix milliseconds, a counter and random bits | `v7(millis~, random)` · `gen.v7()` | ✓ |
+| 8 | 122 bits of your own layout | `v8(custom)` | |
+
+`ticks_of(unix_nanos)` turns nanoseconds since 1970 into the 100-nanosecond intervals since 1582 that versions 1 and 6 count. The namespaces are `namespace_dns`, `namespace_url`, `namespace_oid` and `namespace_x500`; `nil` and `max` are all zeros and all ones.
+
+## Reading and writing
+
+`parse` takes the canonical form, any case, with or without hyphens, in braces, or after `urn:uuid:`:
+
+```moonbit
+@moonuuid.parse("6ba7b8109dad11d180b400c04fd430c8")
+@moonuuid.parse("urn:uuid:6ba7b810-9dad-11d1-80b4-00c04fd430c8")
+```
+
+| Write | Gives |
+|:--|:--|
+| `id.to_string()` | `6ba7b810-9dad-11d1-80b4-00c04fd430c8` |
+| `id.hex()` | `6ba7b8109dad11d180b400c04fd430c8` |
+| `id.urn()` | `urn:uuid:6ba7b810-9dad-11d1-80b4-00c04fd430c8` |
+| `id.bytes()` | the 16 bytes, most significant first |
+| `Json(id)` | the canonical text; `@json.from_json` reads any spelling back |
+
+`Uuid::of_bytes` and `Uuid::of_parts(hi, lo)` build one from 16 bytes or two 64-bit halves. Identifiers compare, hash and sort by their bytes.
+
+## Fields
+
+| Method | Returns |
+|:--|:--|
+| `variant()` | `Ncs`, `Rfc`, `Microsoft` or `Future` |
+| `version()` | the version for an RFC 9562 id, else `None` |
+| `time()` | 100-ns ticks since 1582 for versions 1 and 6, milliseconds since 1970 for version 7 |
+| `clock_seq()` | the 14-bit clock sequence |
+| `node()` | the 48-bit node |
+
+## The generator
+
+`Generator::new(clock~, random~)` keeps what the time-based versions need between calls. `clock` gives nanoseconds since 1970 and `random` gives a number of random bytes.
+
+- Version 1 and 6 timestamps never repeat or go back; the clock sequence is random unless you pass one.
+- Version 7 ids made within one millisecond count up with a fresh random tail. If the clock steps back, the next id uses the millisecond after the last one, so the order holds.
+
+## Errors
+
+| `Refused` | When |
+|:--|:--|
+| `Malformed(at~, reason~)` | text that is not 32 hexadecimal digits; `at` is where it went wrong |
+| `Size(want~, got~)` | bytes, or a random source, of the wrong length |
 
 ## Licence
 
-Apache-2.0.
+Apache-2.0. See [LICENSE](LICENSE).
