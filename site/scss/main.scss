@@ -82,8 +82,11 @@
   --rule: color-mix(in srgb, #8fb0ff 15%, transparent);
   --rule-strong: color-mix(in srgb, #8fb0ff 30%, transparent);
 
-  --code-bg: #0d1512;
-  --code-bg-2: #0a100e;
+  // In the dark theme the page is already near black, so the code surface
+  // sits slightly above it instead of below: still chalk on a board, but
+  // with an edge the eye can find.
+  --code-bg: #1d2724;
+  --code-bg-2: #151c1a;
   --code-ink: #ddd9cb;
   --code-dim: #7f8c83;
 
@@ -1116,7 +1119,9 @@ body::after {
   border-radius: 5px;
   overflow: hidden;
   background: var(--code-bg);
-  border: 1px solid var(--code-bg-2);
+  // The fill separates the block on light paper; in the dark theme it is too
+  // close to the page, so a hairline of the ink carries the edge.
+  border: 1px solid color-mix(in srgb, var(--code-ink) 13%, transparent);
   box-shadow: inset 0 0 60px rgba(0, 0, 0, 0.28), 0 12px 30px -26px rgba(0, 0, 0, 0.9);
 }
 
@@ -1648,7 +1653,7 @@ body::after {
   font-size: clamp(1.5rem, 2.6vw, 1.9rem);
   font-weight: 900;
   padding-bottom: 8px;
-  border-bottom: 2px solid var(--ink);
+  border-bottom: 2px solid color-mix(in srgb, var(--ink) 68%, transparent);
   margin-bottom: 6px;
 }
 
