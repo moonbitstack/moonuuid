@@ -1,1 +1,2 @@
-docs/api.html text eol=lf
+# the pages are generated; keep them LF on every checkout so a rebuild diffs clean
+docs/*.html text eol=lf
