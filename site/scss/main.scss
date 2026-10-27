@@ -352,14 +352,20 @@ body::after {
   flex-shrink: 0;
   border-radius: 50%;
   border: 1.5px solid var(--blue);
-  display: grid;
-  place-items: center;
+  // One column: the number and the word are a single mark, so they must be
+  // centred together. As grid items they each claimed half the circle and
+  // opened a gap between them.
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5px;
   position: relative;
   transform: rotate(-7deg);
   color: var(--blue);
   font-family: var(--font-display);
   font-weight: 900;
-  font-size: 0.82rem;
+  font-size: 0.78rem;
   letter-spacing: -0.04em;
   line-height: 1;
 }
@@ -372,14 +378,22 @@ body::after {
   border: 1px dashed color-mix(in srgb, var(--margin) 70%, transparent);
 }
 
+.seal__num {
+  display: block;
+}
+
 .seal small {
   display: block;
   font-family: var(--font-mono);
   font-size: 0.38rem;
   font-weight: 500;
   letter-spacing: 0.14em;
+  line-height: 1;
   color: var(--margin);
   text-align: center;
+  // letter-spacing also trails the last glyph, which pushes the ink left of the
+  // box. An equal pad on the other side puts the word back under the number.
+  padding-left: 0.14em;
 }
 
 .brand__text {
@@ -465,6 +479,8 @@ body::after {
 
 .icon-btn {
   appearance: none;
+  padding: 0;
+  line-height: 0;
   border: 1px solid var(--rule-strong);
   background: var(--paper-raised);
   color: var(--ink-2);
@@ -482,6 +498,28 @@ body::after {
   border-color: var(--blue);
   color: var(--blue);
   transform: translateY(-1px);
+}
+
+/* Ink does not fill its viewBox, so the box is not the icon's size. Measure the
+   drawing instead and give both glyphs the same 17px across: the solid mark
+   spans all 16 units of its box, while the sun's rays stop at 20.5 of 24. A
+   crescent carries less ink than a disc at equal width, so it gets a little
+   more; and the cat sits high inside its square, hence the nudge down. */
+.icon-github {
+  width: 17px;
+  height: 17px;
+  transform: translateY(0.35px);
+}
+
+.icon-sun {
+  width: 20px;
+  height: 20px;
+}
+
+.icon-moon {
+  width: 21px;
+  height: 21px;
+  transform: translateY(0.2px);
 }
 
 [data-theme="dark"] .icon-sun,
@@ -1988,7 +2026,7 @@ body::after {
   .seal {
     width: 36px;
     height: 36px;
-    font-size: 0.72rem;
+    font-size: 0.7rem;
   }
 
   .brand__word {
