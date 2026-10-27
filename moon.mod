@@ -10,7 +10,7 @@ license = "Apache-2.0"
 
 keywords = [ "uuid", "guid", "identifier", "rfc9562", "moonbit" ]
 
-description = "UUIDs: parse and write every spelling, make versions 1 to 8, and a generator over a clock and randomness you supply."
+description = "UUIDs for MoonBit: parsing and versions 1 to 8."
 
 source = "src"
 
