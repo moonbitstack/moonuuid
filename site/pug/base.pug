@@ -20,6 +20,10 @@ html(lang="en" data-theme="light")
           }
           document.documentElement.dataset.theme = t;
         } catch (e) {}
+        // Set before the first paint, so the native scrollbar is never seen.
+        if (window.matchMedia("(pointer: fine)").matches) {
+          document.documentElement.classList.add("has-rail");
+        }
       })();
     block head
   body
@@ -28,5 +32,11 @@ html(lang="en" data-theme="light")
     main#main.page
       block content
     include partials/colophon.pug
+    //- The bookmark is a page element, not a scrollbar part: only a real box can
+    //- be told where the thumb is, which is what lets the cord stop at it.
+    div.rail(aria-hidden="true")
+      span.rail__cord
+      span.rail__thumb
     script(src="assets/theme.js" defer)
+    script(src="assets/rail.js" defer)
     block scripts

@@ -38,8 +38,10 @@ await esbuild.build({
   logLevel: "warning",
 });
 
-/* 3. the small runtime script ------------------------------------------- */
-await copyFile(path.join(here, "static", "theme.js"), path.join(assets, "theme.js"));
+/* 3. the small runtime scripts ------------------------------------------- */
+for (const name of ["theme.js", "rail.js"]) {
+  await copyFile(path.join(here, "static", name), path.join(assets, name));
+}
 
 /* 4. the compiled library, if it has been built ------------------------- */
 const candidates = [

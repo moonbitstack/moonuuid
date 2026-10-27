@@ -27,10 +27,12 @@
   // the scrollbar ribbon: margin red, a shade deeper so 9px of it does not glare
   --ribbon: #b95545;
   --ribbon-hot: #a1453a;
-  // and the cord it hangs from, with the two strand alphas that make its twist
-  --cord: color-mix(in srgb, var(--ribbon) 74%, transparent);
-  --cord-hi: 0.52;
-  --cord-lo: 0.34;
+  // and the cord it hangs from, with the two strand alphas that make its twist.
+  // The body has to stay solid: at 3px it is the only thing telling the eye the
+  // line is continuous, and a pale body turns the twist into a dotted seam.
+  --cord: color-mix(in srgb, var(--ribbon) 92%, transparent);
+  --cord-hi: 0.26;
+  --cord-lo: 0.24;
 
   --f0: #2b4c96;
   --f1: #b4562f;
@@ -86,9 +88,9 @@
   --ribbon-hot: #c4796a;
   // the same cord, but a light strand on black glows: hold the highlight back
   // and let the shadow do the modelling instead
-  --cord: color-mix(in srgb, var(--ribbon) 80%, transparent);
-  --cord-hi: 0.18;
-  --cord-lo: 0.28;
+  --cord: color-mix(in srgb, var(--ribbon) 92%, transparent);
+  --cord-hi: 0.17;
+  --cord-lo: 0.30;
 
   --f0: #9dbaff;
   --f1: #ff9f7c;
@@ -256,29 +258,39 @@ body::after {
   }
 }
 
-/* The page scrollbar is a bookmark. The thumb is a ribbon of margin red with a
-   swallowtail cut in its lower edge: the body is one flat fill, and the two
-   tails below it are the halves of a box split corner to corner, which leaves
-   the V the fill does not cover. Keeping the tails as gradients rather than an
-   SVG means the colour stays a variable, so hover only swaps it.
+/* The page scrollbar is a bookmark: a ribbon of margin red with a swallowtail
+   cut in its lower edge, hanging from a cord. The ribbon is one flat fill, and
+   the two tails below it are the halves of a box split corner to corner, which
+   leaves the V the fill does not cover. Keeping the tails as gradients rather
+   than an SVG means the colour stays a variable, so hover only swaps it.
 
    A half-stop gradient cuts through the centre of its box at a right angle to
    the gradient line, which only lands on the corners when that box is square.
    So each tail is half the ribbon wide, and the notch is half as deep as the
    ribbon is wide: a 45 degree snip, and the only proportion that draws a true
-   point instead of an off-centre step. */
+   point instead of an off-centre step.
+
+   Why the bookmark is a page element and not ::-webkit-scrollbar-thumb: the
+   cord has to stop where the ribbon starts, and a scrollbar part can never know
+   that. The track is painted from its own style, before the thumb is placed;
+   animations and scroll timelines do not run on scrollbar parts (measured: the
+   track keeps background-size 12px 0 at every scroll offset), and nothing but
+   the theme can size or shift one. So the webkit rules below only serve the
+   containers that scroll on their own -- the API index, a long token, a code
+   block -- plus the no-JS fallback of the page bar, where the ribbon is drawn
+   plainly and the track stays empty. */
 $rail: 12px;
 $ribbon: 8px;
 $notch: $ribbon * 0.5;
+$cord: 3px; // width of the thread
+$strand: 2px; // one light strand plus one shadow strand, across the axis
+$turn: 4px; // vertical distance of one twist; $strand / cos(60deg)
 
 @mixin ribbon($colour) {
   background-image:
     linear-gradient($colour, $colour),
     linear-gradient(to bottom right, $colour 50%, transparent 50%),
     linear-gradient(to bottom left, $colour 50%, transparent 50%);
-  // If a browser cannot resolve calc() in a scrollbar background, the second
-  // declaration is dropped and the first leaves a plain bar: the tails are the
-  // same colour as the body, so nothing looks broken, only uncut.
   background-size: 100% 100%, 50% $notch, 50% $notch;
   background-size: 100% calc(100% - #{$notch}), 50% $notch, 50% $notch;
   background-position: top left, bottom left, bottom right;
@@ -290,59 +302,8 @@ $notch: $ribbon * 0.5;
   height: $rail;
 }
 
-/* The rail is not empty: a cord of the same red runs down its middle, so the
-   ribbon hangs from a thread instead of sliding through blank margin. The thumb
-   is opaque and paints over it, so the line reads above the ribbon, the ribbon,
-   then the line again below, and the cord looks continuous because the ribbon
-   covers exactly the piece it would have hidden.
-
-   The cord is two gradients stacked. The lower one is the body: a 3px band
-   whose alpha falls away over its outermost pixels, which is as close to a blur
-   as a scrollbar background can get — filter and mask do not reach scrollbar
-   parts. Above it sits the twist: a repeating diagonal of two strands, a warm
-   highlight and a warm shadow, both semi transparent, so they re-shade the
-   colour underneath instead of replacing it. Their own edges are stops that
-   fade rather than step, which reads as round strands at this size and keeps
-   the candy cane out of it.
-
-   That twist cannot simply be tiled at any size. A diagonal stripe of period p
-   at gradient angle t repeats every p / cos(t) down the page, and the tile has
-   to be exactly that tall or the strands jog sideways at every seam. At 60deg
-   cos(t) is a half, so a 2px strand turns over every 4px, and the tile is 4px:
-   whole numbers, no subpixel seams, eight device pixels per turn at 2x.
-
-   The selector matters more than the gradient. Chrome builds one scrollbar from
-   one originating element, and a track written as html::-webkit-scrollbar-track
-   against a thumb written as ::-webkit-scrollbar-thumb is silently dropped: the
-   track computes the background and then never paints it. So every part of this
-   scrollbar is styled through the same bare pseudo, and the two blocks further
-   down that do want a plain bar switch the cord off again. */
-$cord: 3px;      // width of the thread
-$strand: 2px;    // one light strand plus one shadow strand, across the axis
-$turn: 4px;      // vertical distance of one twist; $strand / cos(60deg)
-
 ::-webkit-scrollbar-track {
-  background-image:
-    repeating-linear-gradient(
-      60deg,
-      rgba(255, 250, 244, var(--cord-hi)) 0 calc(#{$strand} * 0.225),
-      rgba(255, 250, 244, 0) calc(#{$strand} * 0.475) calc(#{$strand} * 0.525),
-      rgba(70, 32, 24, var(--cord-lo)) calc(#{$strand} * 0.575) calc(#{$strand} * 0.775),
-      rgba(70, 32, 24, 0) calc(#{$strand} * 0.975) $strand
-    ),
-    linear-gradient(
-      90deg,
-      transparent calc(50% - #{$cord} * 0.5),
-      color-mix(in srgb, var(--cord) 38%, transparent) calc(50% - #{$cord} * 0.28),
-      color-mix(in srgb, var(--cord) 84%, transparent) calc(50% - #{$cord} * 0.13),
-      var(--cord) 50%,
-      color-mix(in srgb, var(--cord) 84%, transparent) calc(50% + #{$cord} * 0.13),
-      color-mix(in srgb, var(--cord) 38%, transparent) calc(50% + #{$cord} * 0.28),
-      transparent calc(50% + #{$cord} * 0.5)
-    );
-  background-size: $cord $turn, 100% 100%;
-  background-position: center top, 0 0;
-  background-repeat: repeat-y, no-repeat;
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
@@ -362,6 +323,118 @@ $turn: 4px;      // vertical distance of one twist; $strand / cos(60deg)
   background: transparent;
 }
 
+/* ---------- the rail ---------------------------------------------------- */
+
+/* A fixed strip in the margin, holding the cord and the ribbon. It is only
+   built when the head script has found a fine pointer and set .has-rail, so
+   touch devices keep their own overlay bar, which is better there anyway. */
+.rail {
+  display: none;
+}
+
+.has-rail {
+  // Both families, because Chrome only learned scrollbar-width: none in 121 and
+  // anything older would otherwise keep its own 12px bar next to this padding
+  // and wear two bookmarks.
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+  }
+
+  // The native bar took 12px out of the layout, so the rail's margin is given
+  // back here: the page keeps the width it had, and the bookmark sits in the
+  // strip the scrollbar used to own. A page that does not scroll has no bar and
+  // no bookmark, so it gets its 12px back.
+  padding-inline-end: $rail;
+
+  &.rail-idle {
+    padding-inline-end: 0;
+  }
+
+  .rail {
+    display: block;
+    position: fixed;
+    inset-block: 0;
+    inset-inline-end: 0;
+    width: $rail;
+    // Under the paper grain, so one texture lies over page and bookmark alike.
+    z-index: 9998;
+    pointer-events: none;
+
+    &.is-idle {
+      display: none;
+    }
+  }
+}
+
+/* The cord pays out as the page is scrolled: its height is set to the ribbon's
+   top edge, so it always ends tucked behind the ribbon and never shows below.
+   Its body is a 3px band whose alpha falls away towards both edges; over that
+   a repeating diagonal of a warm highlight and a warm shadow gives the twist,
+   with stops that fade rather than step so the strands read round. A blur is
+   finally available here, now that this is a real box.
+
+   The twist cannot be tiled at any size. A diagonal stripe of period p at
+   gradient angle t repeats every p / cos(t) down the page, and the tile has to
+   be exactly that tall or the strands jog sideways at every seam. At 60deg
+   cos(t) is a half, so a 2px strand turns over every 4px: whole numbers, no
+   subpixel seams, eight device pixels per turn at 2x. */
+.rail__cord {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-start: 50%;
+  width: $cord;
+  height: var(--cord-h, 0px);
+  margin-inline-start: $cord * -0.5;
+  background-image:
+    repeating-linear-gradient(
+      60deg,
+      rgba(255, 250, 244, var(--cord-hi)) 0 calc(#{$strand} * 0.225),
+      rgba(255, 250, 244, 0) calc(#{$strand} * 0.475) calc(#{$strand} * 0.525),
+      rgba(70, 32, 24, var(--cord-lo)) calc(#{$strand} * 0.575) calc(#{$strand} * 0.775),
+      rgba(70, 32, 24, 0) calc(#{$strand} * 0.975) $strand
+    ),
+    linear-gradient(
+      90deg,
+      transparent 0%,
+      color-mix(in srgb, var(--cord) 38%, transparent) 22%,
+      color-mix(in srgb, var(--cord) 84%, transparent) 37%,
+      var(--cord) 50%,
+      color-mix(in srgb, var(--cord) 84%, transparent) 63%,
+      color-mix(in srgb, var(--cord) 38%, transparent) 78%,
+      transparent 100%
+    );
+  background-size: $cord $turn, 100% 100%;
+  background-repeat: repeat-y, no-repeat;
+  filter: blur(0.4px);
+}
+
+.rail__thumb {
+  @include ribbon(var(--ribbon));
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-start: ($rail - $ribbon) * 0.5;
+  width: $ribbon;
+  height: var(--thumb-h, 60px);
+  transform: translateY(var(--thumb-y, 0px));
+  pointer-events: auto;
+  cursor: grab;
+  // Dragging is ours now, so the browser may not claim the gesture or the text.
+  touch-action: none;
+  user-select: none;
+
+  &:hover,
+  &.is-held {
+    @include ribbon(var(--ribbon-hot));
+  }
+
+  &.is-held {
+    cursor: grabbing;
+  }
+}
+
 /* Inside a code block or a narrow column the rail is short and usually
    horizontal: a cut ribbon there reads as a slash across the chalk, so those
    get a quiet bar instead. */
@@ -370,10 +443,6 @@ $turn: 4px;      // vertical distance of one twist; $strand / cos(60deg)
   &::-webkit-scrollbar {
     width: 9px;
     height: 9px;
-  }
-
-  &::-webkit-scrollbar-track {
-    background-image: none;
   }
 
   &::-webkit-scrollbar-thumb {
@@ -392,10 +461,6 @@ $turn: 4px;      // vertical distance of one twist; $strand / cos(60deg)
   &::-webkit-scrollbar {
     width: 8px;
     height: 8px;
-  }
-
-  &::-webkit-scrollbar-track {
-    background-image: none;
   }
 
   &::-webkit-scrollbar-thumb {
