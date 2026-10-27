@@ -27,6 +27,10 @@
   // the scrollbar ribbon: margin red, a shade deeper so 9px of it does not glare
   --ribbon: #b95545;
   --ribbon-hot: #a1453a;
+  // and the cord it hangs from, with the two strand alphas that make its twist
+  --cord: color-mix(in srgb, var(--ribbon) 74%, transparent);
+  --cord-hi: 0.52;
+  --cord-lo: 0.34;
 
   --f0: #2b4c96;
   --f1: #b4562f;
@@ -80,6 +84,11 @@
   // muted on a dark page: a bright coral at this size reads as a highlighter
   --ribbon: #a86153;
   --ribbon-hot: #c4796a;
+  // the same cord, but a light strand on black glows: hold the highlight back
+  // and let the shadow do the modelling instead
+  --cord: color-mix(in srgb, var(--ribbon) 80%, transparent);
+  --cord-hi: 0.18;
+  --cord-lo: 0.28;
 
   --f0: #9dbaff;
   --f1: #ff9f7c;
@@ -281,8 +290,59 @@ $notch: $ribbon * 0.5;
   height: $rail;
 }
 
+/* The rail is not empty: a cord of the same red runs down its middle, so the
+   ribbon hangs from a thread instead of sliding through blank margin. The thumb
+   is opaque and paints over it, so the line reads above the ribbon, the ribbon,
+   then the line again below, and the cord looks continuous because the ribbon
+   covers exactly the piece it would have hidden.
+
+   The cord is two gradients stacked. The lower one is the body: a 3px band
+   whose alpha falls away over its outermost pixels, which is as close to a blur
+   as a scrollbar background can get — filter and mask do not reach scrollbar
+   parts. Above it sits the twist: a repeating diagonal of two strands, a warm
+   highlight and a warm shadow, both semi transparent, so they re-shade the
+   colour underneath instead of replacing it. Their own edges are stops that
+   fade rather than step, which reads as round strands at this size and keeps
+   the candy cane out of it.
+
+   That twist cannot simply be tiled at any size. A diagonal stripe of period p
+   at gradient angle t repeats every p / cos(t) down the page, and the tile has
+   to be exactly that tall or the strands jog sideways at every seam. At 60deg
+   cos(t) is a half, so a 2px strand turns over every 4px, and the tile is 4px:
+   whole numbers, no subpixel seams, eight device pixels per turn at 2x.
+
+   The selector matters more than the gradient. Chrome builds one scrollbar from
+   one originating element, and a track written as html::-webkit-scrollbar-track
+   against a thumb written as ::-webkit-scrollbar-thumb is silently dropped: the
+   track computes the background and then never paints it. So every part of this
+   scrollbar is styled through the same bare pseudo, and the two blocks further
+   down that do want a plain bar switch the cord off again. */
+$cord: 3px;      // width of the thread
+$strand: 2px;    // one light strand plus one shadow strand, across the axis
+$turn: 4px;      // vertical distance of one twist; $strand / cos(60deg)
+
 ::-webkit-scrollbar-track {
-  background: transparent;
+  background-image:
+    repeating-linear-gradient(
+      60deg,
+      rgba(255, 250, 244, var(--cord-hi)) 0 calc(#{$strand} * 0.225),
+      rgba(255, 250, 244, 0) calc(#{$strand} * 0.475) calc(#{$strand} * 0.525),
+      rgba(70, 32, 24, var(--cord-lo)) calc(#{$strand} * 0.575) calc(#{$strand} * 0.775),
+      rgba(70, 32, 24, 0) calc(#{$strand} * 0.975) $strand
+    ),
+    linear-gradient(
+      90deg,
+      transparent calc(50% - #{$cord} * 0.5),
+      color-mix(in srgb, var(--cord) 38%, transparent) calc(50% - #{$cord} * 0.28),
+      color-mix(in srgb, var(--cord) 84%, transparent) calc(50% - #{$cord} * 0.13),
+      var(--cord) 50%,
+      color-mix(in srgb, var(--cord) 84%, transparent) calc(50% + #{$cord} * 0.13),
+      color-mix(in srgb, var(--cord) 38%, transparent) calc(50% + #{$cord} * 0.28),
+      transparent calc(50% + #{$cord} * 0.5)
+    );
+  background-size: $cord $turn, 100% 100%;
+  background-position: center top, 0 0;
+  background-repeat: repeat-y, no-repeat;
 }
 
 ::-webkit-scrollbar-thumb {
@@ -312,6 +372,10 @@ $notch: $ribbon * 0.5;
     height: 9px;
   }
 
+  &::-webkit-scrollbar-track {
+    background-image: none;
+  }
+
   &::-webkit-scrollbar-thumb {
     background: color-mix(in srgb, var(--code-ink) 28%, transparent);
     border-radius: 999px;
@@ -328,6 +392,10 @@ $notch: $ribbon * 0.5;
   &::-webkit-scrollbar {
     width: 8px;
     height: 8px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background-image: none;
   }
 
   &::-webkit-scrollbar-thumb {
