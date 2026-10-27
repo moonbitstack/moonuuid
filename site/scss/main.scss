@@ -24,6 +24,10 @@
   --gold-soft: #f8e7b6;
   --green: #34755b;
 
+  // the scrollbar ribbon: margin red, a shade deeper so 9px of it does not glare
+  --ribbon: #b95545;
+  --ribbon-hot: #a1453a;
+
   --f0: #2b4c96;
   --f1: #b4562f;
   --f2: #9a7412;
@@ -72,6 +76,10 @@
   --gold: #e6c266;
   --gold-soft: #3a3220;
   --green: #7fceb0;
+
+  // muted on a dark page: a bright coral at this size reads as a highlighter
+  --ribbon: #a86153;
+  --ribbon-hot: #c4796a;
 
   --f0: #9dbaff;
   --f1: #ff9f7c;
@@ -215,17 +223,62 @@ body::after {
 
 /* ---------- scrollbars -------------------------------------------------- */
 
-/* Firefox and browsers without the webkit pseudos take the standard pair. */
+/* Chrome drops every ::-webkit-scrollbar rule on an element the moment the
+   standard properties are set, so the two families cannot share a selector.
+   Firefox and everything else without the webkit pseudos get the standard pair
+   here, and the rest of this section styles the webkit ones. */
 @supports not selector(::-webkit-scrollbar) {
   html {
-    scrollbar-color: color-mix(in srgb, var(--blue) 62%, transparent) transparent;
+    scrollbar-color: var(--ribbon) transparent;
+    scrollbar-width: thin;
+  }
+
+  .api-side,
+  .uuidline,
+  .bigline {
+    scrollbar-color: color-mix(in srgb, var(--ink) 34%, transparent) transparent;
+    scrollbar-width: thin;
+  }
+
+  .snippet pre,
+  .out pre {
+    scrollbar-color: color-mix(in srgb, var(--code-ink) 34%, transparent) transparent;
     scrollbar-width: thin;
   }
 }
 
+/* The page scrollbar is a bookmark. The thumb is a ribbon of margin red with a
+   swallowtail cut in its lower edge: the body is one flat fill, and the two
+   tails below it are the halves of a box split corner to corner, which leaves
+   the V the fill does not cover. Keeping the tails as gradients rather than an
+   SVG means the colour stays a variable, so hover only swaps it.
+
+   A half-stop gradient cuts through the centre of its box at a right angle to
+   the gradient line, which only lands on the corners when that box is square.
+   So each tail is half the ribbon wide, and the notch is half as deep as the
+   ribbon is wide: a 45 degree snip, and the only proportion that draws a true
+   point instead of an off-centre step. */
+$rail: 12px;
+$ribbon: 8px;
+$notch: $ribbon * 0.5;
+
+@mixin ribbon($colour) {
+  background-image:
+    linear-gradient($colour, $colour),
+    linear-gradient(to bottom right, $colour 50%, transparent 50%),
+    linear-gradient(to bottom left, $colour 50%, transparent 50%);
+  // If a browser cannot resolve calc() in a scrollbar background, the second
+  // declaration is dropped and the first leaves a plain bar: the tails are the
+  // same colour as the body, so nothing looks broken, only uncut.
+  background-size: 100% 100%, 50% $notch, 50% $notch;
+  background-size: 100% calc(100% - #{$notch}), 50% $notch, 50% $notch;
+  background-position: top left, bottom left, bottom right;
+  background-repeat: no-repeat;
+}
+
 ::-webkit-scrollbar {
-  width: 13px;
-  height: 13px;
+  width: $rail;
+  height: $rail;
 }
 
 ::-webkit-scrollbar-track {
@@ -233,23 +286,58 @@ body::after {
 }
 
 ::-webkit-scrollbar-thumb {
-  background-color: color-mix(in srgb, var(--blue) 58%, transparent);
-  background-image: repeating-linear-gradient(
-    45deg,
-    color-mix(in srgb, var(--paper) 34%, transparent) 0 2px,
-    transparent 2px 6px
-  );
-  border: 3px solid transparent;
-  background-clip: content-box;
-  border-radius: 999px;
+  @include ribbon(var(--ribbon));
+  // Air on either side: a 12px rail with an 8px ribbon reads as a ribbon rather
+  // than a bar glued to the window edge. No border top or bottom, or the tails
+  // would stop short of the thumb's end and float.
+  border-inline: ($rail - $ribbon) * 0.5 solid transparent;
+  background-clip: padding-box;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background-color: color-mix(in srgb, var(--blue) 80%, transparent);
+  @include ribbon(var(--ribbon-hot));
 }
 
 ::-webkit-scrollbar-corner {
   background: transparent;
+}
+
+/* Inside a code block or a narrow column the rail is short and usually
+   horizontal: a cut ribbon there reads as a slash across the chalk, so those
+   get a quiet bar instead. */
+.snippet pre,
+.out pre {
+  &::-webkit-scrollbar {
+    width: 9px;
+    height: 9px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: color-mix(in srgb, var(--code-ink) 28%, transparent);
+    border-radius: 999px;
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background: color-mix(in srgb, var(--code-ink) 48%, transparent);
+  }
+}
+
+.api-side,
+.uuidline,
+.bigline {
+  &::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: color-mix(in srgb, var(--ink) 26%, transparent);
+    border-radius: 999px;
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background: color-mix(in srgb, var(--ink) 46%, transparent);
+  }
 }
 
 /* ---------- utilities --------------------------------------------------- */
@@ -787,7 +875,6 @@ body::after {
   overflow-x: auto;
   padding: 10px 2px 12px;
   border-bottom: 1px dashed var(--rule-strong);
-  scrollbar-width: thin;
 }
 
 .uuidline.is-empty {
@@ -977,6 +1064,10 @@ body::after {
   font-weight: 700;
   margin-bottom: 12px;
   transform: rotate(-4deg);
+  // Caveat sets a narrow advance and lets the digits overhang it: the ink sits
+  // 1.7px right of the centre and 1.3px below it. Padding on the far sides
+  // moves the content box by half as much, so double the measured drift.
+  padding: 0 3.4px 2.6px 0;
 }
 
 .feature h3 {
@@ -1384,7 +1475,6 @@ body::after {
   white-space: nowrap;
   overflow-x: auto;
   padding: 8px 0 12px;
-  scrollbar-width: thin;
 }
 
 .bitstrip {
@@ -1600,7 +1690,6 @@ body::after {
   max-height: calc(100vh - 120px);
   overflow-y: auto;
   padding-right: 8px;
-  scrollbar-width: thin;
 }
 
 .api-filter {
