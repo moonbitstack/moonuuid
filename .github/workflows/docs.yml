@@ -1,0 +1,84 @@
+name: Docs
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - "src/**"
+      - "site/**"
+      - "scripts/**"
+      - ".github/workflows/docs.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: install moonbit
+        run: |
+          curl -fsSL https://cli.moonbitlang.com/install/unix.sh | bash
+          echo "$HOME/.moon/bin" >> $GITHUB_PATH
+
+      - name: moon version
+        run: |
+          moon version --all
+          moon update
+
+      # The package the docs demo with, compiled to a self-contained ESM.
+      - name: build the browser bundle
+        run: moon build --target js --release src/jsapi
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: site/package-lock.json
+
+      - name: install site toolchain
+        run: npm ci
+        working-directory: site
+
+      - name: typecheck the site
+        run: npm run check
+        working-directory: site
+
+      # The reference body is generated from the sources, so it cannot drift.
+      - name: generate the reference
+        run: python3 scripts/gen_api.py
+
+      - name: render the site
+        run: npm run build
+        working-directory: site
+
+      - name: the reference is up to date
+        run: git diff --exit-code docs/api.html
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

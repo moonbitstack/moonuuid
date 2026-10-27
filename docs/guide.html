@@ -1,0 +1,114 @@
+<!DOCTYPE html><html lang="en" data-theme="light"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Guide — moonuuid</title><meta name="description" content="A short, runnable guide to parsing, writing, reading the fields, and generating UUIDs of every version."><meta name="theme-color" content="#fbf6ea"><link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='10' fill='%23fbf6ea'/%3E%3Cpath d='M18 14v22a14 14 0 0 0 28 0V14' fill='none' stroke='%2323458f' stroke-width='7' stroke-linecap='round'/%3E%3C/svg%3E"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&amp;family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,900&amp;family=JetBrains+Mono:wght@400;500;700&amp;family=Spectral:ital,wght@0,400;0,500;0,600;1,400&amp;display=swap"><link rel="stylesheet" href="assets/style.css"><script>(function () {
+  try {
+    var t = localStorage.getItem("moonuuid-theme");
+    if (!t) {
+      t = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+    }
+    document.documentElement.dataset.theme = t;
+  } catch (e) {}
+})();</script></head><body><a class="skip" href="#main">Skip to content</a><header class="masthead"><div class="shell masthead__inner"><a class="brand" href="./" aria-label="moonuuid home"><span class="seal">128<small>BIT</small></span><span class="brand__text"><span class="brand__word">moonuuid</span><span class="brand__sub">identifier notes</span></span></a><nav class="nav" aria-label="Sections"><a href="./">Home</a><a class="is-active" href="guide.html" aria-current="page">Guide</a><a href="api.html">API</a><a href="showcase.html">Anatomy</a></nav><div class="meta"><span class="edition">MoonBit · RFC 9562</span><button class="icon-btn" type="button" data-theme-toggle aria-label="Switch theme"><svg class="icon-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"></circle><path d="M12 2.6v2.2M12 19.2v2.2M2.6 12h2.2M19.2 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M18.7 5.3l-1.6 1.6M6.9 17.1l-1.6 1.6"></path></svg><svg class="icon-moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.5 14.5A8.5 8.5 0 0 1 9.5 3.5a8.5 8.5 0 1 0 11 11z"></path></svg></button><a class="icon-btn gh" href="https://github.com/moonbitstack/moonuuid" aria-label="Repository on GitHub" title="Repository on GitHub"><svg width="19" height="19" viewBox="0 0 16 16" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8z"></path></svg></a></div></div></header><main class="page" id="main"><div class="shell"><header class="page-head"><p class="kicker">field notes · eleven sections</p><h1>A short guide</h1><p class="lead">From the first parse to a generator over your own clock, one runnable block at a time. Every output below is copied from a real run.</p></header><div class="guide-layout"><nav class="toc" aria-label="Guide contents"><div class="toc__title">Contents</div><a href="#install">Install</a><a href="#read">Read one</a><a href="#spellings">Every spelling</a><a href="#write">Write it back</a><a href="#fields">Look inside</a><a href="#generator">A clock and a random source</a><a href="#time">Time-based, field by field</a><a href="#names">From a name</a><a href="#custom">Your own layout</a><a href="#refused">When it refuses</a><a href="#json">JSON</a></nav><article class="article"><section class="guide-section" id="install"><h2><span class="no">01</span>Install</h2><div class="body"><p>Add the package, then import it where you use it. The module is
+      <code>moonbitstack/moonuuid</code>, and the import brings it in as
+      <code>@moonuuid</code>.</p></div><div class="snippet"><div class="snippet__head"><span class="snippet__lang">shell</span><button class="snippet__copy" type="button" data-copy="snippet">Copy</button></div><pre><code class="lang-shell"><span class="tok-k">moon</span> add moonbitstack/moonuuid</code></pre></div><div class="snippet"><div class="snippet__head"><span class="snippet__lang">moon.pkg</span><button class="snippet__copy" type="button" data-copy="snippet">Copy</button></div><pre><code class="lang-moonbit">import {
+  <span class="tok-s">&quot;moonbitstack/moonuuid&quot;</span>,
+}</code></pre></div></section><section class="guide-section" id="read"><h2><span class="no">02</span>Read one</h2><div class="body"><p><code>parse</code> takes text and returns a <code>Uuid</code>. Text that is not an
+      identifier comes back as a <code>Refused</code>, so a function that parses has to say
+      what it does with that. <code>fn main raise</code> lets the refusal out.</p></div><div class="snippet"><div class="snippet__head"><span class="snippet__lang">moonbit</span><button class="snippet__copy" type="button" data-copy="snippet">Copy</button></div><pre><code class="lang-moonbit"><span class="tok-k">fn</span> main <span class="tok-k">raise</span> {
+  <span class="tok-k">let</span> id = <span class="tok-p">@moonuuid</span>.parse(<span class="tok-s">&quot;c232ab00-9414-11ec-b3c8-9f6bdeced846&quot;</span>)
+  println(id)
+}</code></pre></div><div class="out"><div class="out__label">prints</div><pre><code>c232ab00-9414-11ec-b3c8-9f6bdeced846</code></pre></div></section><section class="guide-section" id="spellings"><h2><span class="no">03</span>Every spelling</h2><div class="body"><p>Hyphens are optional. Case does not matter. Braces and the
+      <code>urn:uuid:</code> prefix are set aside before the digits are read.</p></div><div class="snippet"><div class="snippet__head"><span class="snippet__lang">moonbit</span><button class="snippet__copy" type="button" data-copy="snippet">Copy</button></div><pre><code class="lang-moonbit"><span class="tok-k">fn</span> main <span class="tok-k">raise</span> {
+  <span class="tok-k">for</span> text <span class="tok-k">in</span> [
+    <span class="tok-s">&quot;c232ab00-9414-11ec-b3c8-9f6bdeced846&quot;</span>,
+    <span class="tok-s">&quot;C232AB00941411ECB3C89F6BDECED846&quot;</span>,
+    <span class="tok-s">&quot;{C232AB00-9414-11EC-B3C8-9F6BDECED846}&quot;</span>,
+    <span class="tok-s">&quot;urn:uuid:c232ab00-9414-11ec-b3c8-9f6bdeced846&quot;</span>,
+  ] {
+    println(<span class="tok-p">@moonuuid</span>.parse(text))
+  }
+}</code></pre></div><div class="out"><div class="out__label">prints</div><pre><code>c232ab00-9414-11ec-b3c8-9f6bdeced846
+c232ab00-9414-11ec-b3c8-9f6bdeced846
+c232ab00-9414-11ec-b3c8-9f6bdeced846
+c232ab00-9414-11ec-b3c8-9f6bdeced846</code></pre></div></section><section class="guide-section" id="write"><h2><span class="no">04</span>Write it back</h2><div class="body"><p><code>to_string</code> gives the canonical form. <code>hex</code> drops the
+      hyphens. <code>urn</code> adds the prefix. All three write lowercase.</p></div><div class="snippet"><div class="snippet__head"><span class="snippet__lang">moonbit</span><button class="snippet__copy" type="button" data-copy="snippet">Copy</button></div><pre><code class="lang-moonbit"><span class="tok-k">fn</span> main <span class="tok-k">raise</span> {
+  <span class="tok-k">let</span> id = <span class="tok-p">@moonuuid</span>.parse(<span class="tok-s">&quot;c232ab00-9414-11ec-b3c8-9f6bdeced846&quot;</span>)
+  println(id.to_string())
+  println(id.hex())
+  println(id.urn())
+}</code></pre></div><div class="out"><div class="out__label">prints</div><pre><code>c232ab00-9414-11ec-b3c8-9f6bdeced846
+c232ab00941411ecb3c89f6bdeced846
+urn:uuid:c232ab00-9414-11ec-b3c8-9f6bdeced846</code></pre></div></section><section class="guide-section" id="fields"><h2><span class="no">05</span>Look inside</h2><div class="body"><p>An identifier answers with the fields its bits name. <code>time</code> is
+      100-nanosecond intervals since 1582 for versions 1 and 6, and milliseconds since
+      1970 for version 7. <code>version</code> is <code>None</code> when the variant is not
+      RFC 9562's, where the version bits mean nothing.</p></div><div class="snippet"><div class="snippet__head"><span class="snippet__lang">moonbit</span><button class="snippet__copy" type="button" data-copy="snippet">Copy</button></div><pre><code class="lang-moonbit"><span class="tok-k">fn</span> main <span class="tok-k">raise</span> {
+  <span class="tok-k">let</span> id = <span class="tok-p">@moonuuid</span>.parse(<span class="tok-s">&quot;c232ab00-9414-11ec-b3c8-9f6bdeced846&quot;</span>)
+  println(id.version())    <span class="tok-c">// Some(1)</span>
+  println(id.variant())    <span class="tok-c">// Rfc</span>
+  println(id.time())       <span class="tok-c">// 138648505420000000</span>
+  println(id.clock_seq())  <span class="tok-c">// 13256</span>
+  println(id.node())       <span class="tok-c">// 175285648414790</span>
+}</code></pre></div><div class="out"><div class="out__label">prints</div><pre><code>Some(1)
+Rfc
+138648505420000000
+13256
+175285648414790</code></pre></div></section><section class="guide-section" id="generator"><h2><span class="no">06</span>A clock and a random source</h2><div class="body"><p>The library never reaches for the clock or for randomness.
+      <code>Generator::new</code> takes a clock that gives nanoseconds since 1970 and a
+      source that gives a number of random bytes. It keeps what the time-based versions
+      need between calls. Here both are fixed, so every run prints the same lines.</p></div><div class="snippet"><div class="snippet__head"><span class="snippet__lang">moonbit</span><button class="snippet__copy" type="button" data-copy="snippet">Copy</button></div><pre><code class="lang-moonbit"><span class="tok-k">fn</span> main <span class="tok-k">raise</span> {
+  <span class="tok-k">let</span> gen = <span class="tok-p">@moonuuid</span>.<span class="tok-t">Generator</span>::new(
+    clock=() =&gt; <span class="tok-n">1_761_350_400_000_000_000L</span>,
+    random=n =&gt; <span class="tok-t">Bytes</span>::makei(n, i =&gt; (i * <span class="tok-n">37</span> + <span class="tok-n">11</span>).to_byte()),
+  )
+  println(gen.v4())
+}</code></pre></div><div class="out"><div class="out__label">prints</div><pre><code>0b30557a-9fc4-490e-b358-7da2c7ec1136</code></pre></div><div class="snippet"><div class="snippet__head"><span class="snippet__lang">moonbit</span><button class="snippet__copy" type="button" data-copy="snippet">Copy</button></div><pre><code class="lang-moonbit"><span class="tok-k">fn</span> main <span class="tok-k">raise</span> {
+  <span class="tok-k">let</span> gen = <span class="tok-p">@moonuuid</span>.<span class="tok-t">Generator</span>::new(
+    clock=() =&gt; <span class="tok-n">1_761_350_400_000_000_000L</span>,
+    random=n =&gt; <span class="tok-t">Bytes</span>::makei(n, i =&gt; (i * <span class="tok-n">37</span> + <span class="tok-n">11</span>).to_byte()),
+  )
+  <span class="tok-k">for</span> _ <span class="tok-k">in</span> <span class="tok-n">0</span>..&lt;<span class="tok-n">3</span> {
+    println(gen.v7())
+  }
+}</code></pre></div><div class="out"><div class="out__label">prints</div><pre><code>019a18aa-3800-74c1-957a-9fc4e90e3358
+019a18aa-3800-74c1-957a-9fc50b30557a
+019a18aa-3800-74c1-957a-9fc60b30557a</code></pre></div><p class="guide-note">Within one millisecond the counter goes up with a fresh random tail. A clock
+          that steps back uses the millisecond after the last one, so the order holds.</p></section><section class="guide-section" id="time"><h2><span class="no">07</span>Time-based, field by field</h2><div class="body"><p><code>ticks_of</code> turns nanoseconds since 1970 into the 100-nanosecond
+      intervals since 1582 that versions 1 and 6 count. Version 6 lays the timestamp's
+      high bits first, so identifiers sort in the order they were made; version 1 keeps
+      the older layout.</p></div><div class="snippet"><div class="snippet__head"><span class="snippet__lang">moonbit</span><button class="snippet__copy" type="button" data-copy="snippet">Copy</button></div><pre><code class="lang-moonbit"><span class="tok-k">fn</span> main {
+  <span class="tok-k">let</span> ticks = <span class="tok-p">@moonuuid</span>.ticks_of(<span class="tok-n">1_761_350_400_000_000_000L</span>)
+  println(<span class="tok-p">@moonuuid</span>.v1(ticks~, clock_seq=<span class="tok-n">0x2A3B</span>, node=<span class="tok-n">0x001A2B3C4D5EL</span>))
+  println(<span class="tok-p">@moonuuid</span>.v6(ticks~, clock_seq=<span class="tok-n">0x2A3B</span>, node=<span class="tok-n">0x001A2B3C4D5EL</span>))
+}</code></pre></div><div class="out"><div class="out__label">prints</div><pre><code>8cacc000-b135-11f0-aa3b-001a2b3c4d5e
+1f0b1358-cacc-6000-aa3b-001a2b3c4d5e</code></pre></div></section><section class="guide-section" id="names"><h2><span class="no">08</span>From a name</h2><div class="body"><p>Versions 3 and 5 hash a namespace and a name: MD5 for version 3, SHA-1 for
+      version 5. The same pair always gives the same identifier. The name is hashed as
+      UTF-8, so text in any language is fine.</p></div><div class="snippet"><div class="snippet__head"><span class="snippet__lang">moonbit</span><button class="snippet__copy" type="button" data-copy="snippet">Copy</button></div><pre><code class="lang-moonbit"><span class="tok-k">fn</span> main {
+  println(<span class="tok-p">@moonuuid</span>.v5(<span class="tok-p">@moonuuid</span>.namespace_url, <span class="tok-s">&quot;https://example.org/&quot;</span>))
+  println(<span class="tok-p">@moonuuid</span>.v5(<span class="tok-p">@moonuuid</span>.namespace_dns, <span class="tok-s">&quot;李雷&quot;</span>))
+}</code></pre></div><div class="out"><div class="out__label">prints</div><pre><code>527dda32-a0de-5105-a042-cb475b5f7d11
+97ce974b-b58a-513c-994e-06af9b649d7f</code></pre></div><p class="guide-note">namespace_dns, namespace_url, namespace_oid and namespace_x500 are the four
+          namespaces RFC 9562 assigns.</p></section><section class="guide-section" id="custom"><h2><span class="no">09</span>Your own layout</h2><div class="body"><p>Version 8 keeps 122 bits of the sixteen bytes you pass and writes only the
+      version and variant over them, so the layout is yours.</p></div><div class="snippet"><div class="snippet__head"><span class="snippet__lang">moonbit</span><button class="snippet__copy" type="button" data-copy="snippet">Copy</button></div><pre><code class="lang-moonbit"><span class="tok-k">fn</span> main <span class="tok-k">raise</span> {
+  <span class="tok-k">let</span> custom = <span class="tok-t">Bytes</span>::makei(<span class="tok-n">16</span>, i =&gt; (i * <span class="tok-n">17</span> + <span class="tok-n">3</span>).to_byte())
+  println(<span class="tok-p">@moonuuid</span>.v8(custom))
+}</code></pre></div><div class="out"><div class="out__label">prints</div><pre><code>03142536-4758-897a-8b9c-adbecfe0f102</code></pre></div></section><section class="guide-section" id="refused"><h2><span class="no">10</span>When it refuses</h2><div class="body"><p><code>Refused</code> says what was wrong. <code>Malformed</code> points at the
+      character that stopped the parse; <code>Size</code> gives the two lengths.</p></div><div class="snippet"><div class="snippet__head"><span class="snippet__lang">moonbit</span><button class="snippet__copy" type="button" data-copy="snippet">Copy</button></div><pre><code class="lang-moonbit"><span class="tok-k">fn</span> main {
+  <span class="tok-k">try</span> {
+    <span class="tok-k">ignore</span>(<span class="tok-p">@moonuuid</span>.parse(<span class="tok-s">&quot;not-a-uuid&quot;</span>))
+  } <span class="tok-k">catch</span> {
+    e =&gt; println(e)
+  }
+  <span class="tok-k">try</span> {
+    <span class="tok-k">ignore</span>(<span class="tok-p">@moonuuid</span>.v4(<span class="tok-t">Bytes</span>::make(<span class="tok-n">3</span>, <span class="tok-n">0</span>)))
+  } <span class="tok-k">catch</span> {
+    e =&gt; println(e)
+  }
+}</code></pre></div><div class="out"><div class="out__label">prints</div><pre><code>&quot;n&quot; is not a hexadecimal digit at 0
+16 bytes wanted, 3 given</code></pre></div></section><section class="guide-section" id="json"><h2><span class="no">11</span>JSON</h2><div class="body"><p>An identifier writes itself as the canonical string, and reads any spelling
+      back. This section needs <code>moonbitlang/core/json</code> in the package's
+      imports.</p></div><div class="snippet"><div class="snippet__head"><span class="snippet__lang">moonbit</span><button class="snippet__copy" type="button" data-copy="snippet">Copy</button></div><pre><code class="lang-moonbit"><span class="tok-k">fn</span> main <span class="tok-k">raise</span> {
+  <span class="tok-k">let</span> id = <span class="tok-p">@moonuuid</span>.parse(<span class="tok-s">&quot;c232ab00-9414-11ec-b3c8-9f6bdeced846&quot;</span>)
+  <span class="tok-k">let</span> j = <span class="tok-t">Json</span>(id)
+  println(j.stringify())
+  <span class="tok-k">let</span> back : <span class="tok-p">@moonuuid</span>.<span class="tok-t">Uuid</span> = <span class="tok-p">@json</span>.from_json(j)
+  println(back)
+}</code></pre></div><div class="out"><div class="out__label">prints</div><pre><code>&quot;c232ab00-9414-11ec-b3c8-9f6bdeced846&quot;
+c232ab00-9414-11ec-b3c8-9f6bdeced846</code></pre></div></section></article></div></div></main><footer class="colophon"><div class="shell colophon__row"><span>moonuuid · Apache-2.0</span><span>page<span class="dash"></span><span class="page-num"><b>02</b> / 04</span></span><span><a href="https://mooncakes.io/docs/moonbitstack/moonuuid">mooncakes</a><span class="dash"></span><a href="https://github.com/moonbitstack/moonuuid">source</a></span></div></footer><script src="assets/theme.js" defer></script></body></html>

@@ -1,0 +1,14 @@
+- var pages = { home: "01", guide: "02", api: "03", showcase: "04" };
+footer.colophon
+  .shell.colophon__row
+    span moonuuid · Apache-2.0
+    span
+      | page
+      span.dash
+      span.page-num
+        b= pages[page] || "01"
+        |  / 04
+    span
+      a(href="https://mooncakes.io/docs/moonbitstack/moonuuid") mooncakes
+      span.dash
+      a(href="https://github.com/moonbitstack/moonuuid") source

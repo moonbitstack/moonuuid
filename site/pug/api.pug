@@ -1,0 +1,12 @@
+extends base.pug
+
+//- The body is written by scripts/gen_api.py, which reads the package
+//- interface and the doc comments. The shell around it is this template, so
+//- the reference keeps the same masthead, navigation and footer as every
+//- other page.
+
+block content
+  != apiBody
+
+block scripts
+  script!= apiFilter

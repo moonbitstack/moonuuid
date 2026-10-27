@@ -1,0 +1,103 @@
+extends base.pug
+include partials/mixins.pug
+
+block head
+  script(type="importmap").
+    { "imports": { "moonuuid": "./assets/moonuuid.js" } }
+
+block content
+  .shell
+    section.hero
+      .hero__text
+        .hero__eyebrow
+          span.kicker MoonBit · RFC 9562
+          span.rule
+        h1
+          | UUIDs,
+          br
+          em written down.
+        p.lead Read any spelling, write the canonical one, and make ids from a name, from a clock, or from random bytes. Time and randomness come in as functions you pass, so the same code runs on every backend.
+        .install
+          span.prompt $
+          code#install-cmd moon add moonbitstack/moonuuid
+          button.copy(type="button" data-copy="#install-cmd") copy
+        .cta
+          a.btn(href="guide.html") Read the guide
+          a.btn.btn--ghost(href="showcase.html") Open the anatomy
+
+      #generator.demo(v-cloak)
+        i.tape
+        .demo__head
+          span.demo__title make one
+          span.live
+            i
+            | live
+        .uuidline(v-bind:class="{ 'is-empty': !info }")
+          span(v-for="(p, i) in parts" v-bind:key="i" v-bind:class="p.hyp ? 'hy' : ('seg seg--' + p.field)" v-bind:title="p.label") {{ p.text }}
+          span(v-if="!info") —
+        .demo__actions
+          button.maker(v-for="v in makers" v-bind:key="v.id" type="button" v-bind:class="{ 'is-on': v.id === last }" v-on:click="pick(v.id)") {{ v.label }}
+        template(v-if="info")
+          .demo__fields
+            span.fieldpill
+              b version
+              |  {{ version }}
+            span.fieldpill
+              b time
+              |  {{ timeText }}
+            span.fieldpill
+              b node
+              |  {{ node }}
+        p.err(v-if="error") {{ error }}
+        .demo__note compiled from MoonBit, running in this page
+
+    section.stats(aria-label="At a glance")
+      each s in home.stats
+        .stat
+          span.stat__num= s.num
+          span.stat__label= s.label
+          span.stat__note= s.note
+
+    section.band
+      .section-head
+        div
+          p.kicker the layout
+          h2 One width, five fields
+        p Every identifier is 128 bits written as five groups. The group sizes never change; what the bits mean depends on the version.
+      .anatomy
+        .anatomy__str
+          each g, i in home.anatomy.groups
+            if i > 0
+              span.hy -
+            span.seg(class="seg--" + g.field)= g.text
+        .anatomy__labels
+          each g in home.anatomy.groups
+            span
+              i(class="seg--" + g.field)
+              = g.label
+
+    section.band
+      .section-head
+        div
+          p.kicker what is here
+          h2 Six things the library does
+      .features
+        each f in home.features
+          article.feature
+            span.feature__num= f.no
+            h3= f.title
+            p!= f.text
+
+    section.band
+      .section-head
+        div
+          p.kicker start
+          h2 Take it for a run
+        p Ten minutes of guide, or the reference when you know what you are looking for.
+      .cta
+        a.btn(href="guide.html") Guide
+        a.btn.btn--ghost(href="api.html") API reference
+
+block scripts
+  script(src="https://cdn.jsdelivr.net/npm/vue@3.5.13/dist/vue.global.prod.js")
+  script(type="module" src="assets/home.js")

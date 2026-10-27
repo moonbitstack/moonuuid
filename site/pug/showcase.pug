@@ -1,0 +1,88 @@
+extends base.pug
+include partials/mixins.pug
+
+block head
+  script(type="importmap").
+    { "imports": { "moonuuid": "./assets/moonuuid.js" } }
+
+block content
+  .shell
+    header.page-head
+      p.kicker anatomy · interactive
+      h1 Every field, in place
+      p.lead Paste an identifier, or make one, and watch the bits line up: the
+        | version nibble, the variant, the timestamp, the clock sequence and the
+        | node. The library doing the reading is the one compiled for this page.
+    #anatomy-app.showcase-grid(v-cloak)
+      section.panel
+        .panel__head
+          .panel__title Paste an identifier
+          span.badge(v-bind:class="info ? 'badge--ok' : (error ? 'badge--bad' : '')") {{ info ? (tag || 'parsed') : (error ? 'refused' : 'idle') }}
+        .paste
+          input(type="text" v-model="input" v-on:input="refresh" spellcheck="false" autocomplete="off" aria-label="UUID text")
+        template(v-if="info")
+          .bigline
+            span(v-for="(p, i) in seg.parts" v-bind:key="i" v-bind:class="p.hyp ? 'hy' : ('seg seg--' + p.field)" v-bind:title="p.label") {{ p.text }}
+          .bitstrip
+            span.bit(v-for="(b, i) in bits" v-bind:key="i" v-bind:class="'bit seg--' + b.field" v-bind:title="'nibble ' + (i + 1)") {{ b.ch }}
+          .legend
+            span(v-for="l in seg.legend" v-bind:key="l.label")
+              i(v-bind:class="'seg--' + l.field")
+              | {{ l.label }}
+        .err(v-if="error") {{ error }}
+        template(v-if="info")
+          .fields
+            .fields__row
+              span.fields__k version
+              span.fields__v {{ version }}
+            .fields__row
+              span.fields__k variant
+              span.fields__v {{ info.variant }}
+            .fields__row
+              span.fields__k timestamp
+              span.fields__v(v-bind:class="{ 'is-dim': !stamp }") {{ stamp ? stamp.iso : '—' }}
+            .fields__row
+              span.fields__k clock sequence
+              span.fields__v(v-bind:class="{ 'is-dim': !clockFields }") {{ clockFields ? info.clockSeq : '—' }}
+            .fields__row
+              span.fields__k node
+              span.fields__v(v-bind:class="{ 'is-dim': !clockFields }") {{ clockFields ? node : '—' }}
+            .fields__row
+              span.fields__k high 64 bits
+              span.fields__v {{ info.hi }}
+            .fields__row
+              span.fields__k low 64 bits
+              span.fields__v {{ info.lo }}
+          p.panel__hint.mt 16 octets, most significant first
+          .bytes
+            .byte(v-for="(c, i) in cells" v-bind:key="i")
+              b {{ c.hex }}
+              i {{ c.dec }}
+
+      aside.panel
+        .panel__head
+          .panel__title Make one
+          span.panel__hint compiled, live
+        .makers
+          button.maker(v-for="v in makers" v-bind:key="v.id" type="button" v-bind:class="{ 'is-on': v.id === last }" v-on:click="generate(v.id)") {{ v.label }}
+        p.panel__hint {{ notes[last] }}
+
+        .field-input
+          label(for="ns") namespace
+          select#ns(v-model="space")
+            option(value="dns") namespace_dns
+            option(value="url") namespace_url
+            option(value="oid") namespace_oid
+            option(value="x500") namespace_x500
+        .field-input
+          label(for="nm") name
+          input#nm(type="text" v-model="name" spellcheck="false" autocomplete="off")
+        p.panel__hint.mt used by v3 and v5
+
+        .subhead Examples
+        .chips
+          button.chip(v-for="e in examples" v-bind:key="e.label" type="button" v-on:click="load(e.uuid)") {{ e.label }}
+
+block scripts
+  script(src="https://cdn.jsdelivr.net/npm/vue@3.5.13/dist/vue.global.prod.js")
+  script(type="module" src="assets/showcase.js")

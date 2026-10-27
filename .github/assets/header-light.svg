@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 190" width="900" height="190" role="img" aria-labelledby="t d">
+  <title id="t">moonuuid</title>
+  <desc id="d">Letterhead: moonuuid, a MoonBit library for RFC 9562 identifiers.</desc>
+
+  <rect width="900" height="190" rx="14" fill="#fbf6ea"/>
+  <rect x="0.6" y="0.6" width="898.8" height="188.8" rx="13.4" fill="none" stroke="#e3d8bd" stroke-width="1.2"/>
+
+  <!-- margin rule -->
+  <path d="M56 34v122" stroke="#d1584a" stroke-width="1.6" stroke-linecap="round" opacity="0.7"/>
+
+  <!-- seal -->
+  <circle cx="104" cy="95" r="30" fill="none" stroke="#23458f" stroke-width="1.3" opacity="0.85"/>
+  <circle cx="104" cy="95" r="24.5" fill="none" stroke="#23458f" stroke-width="0.7" opacity="0.4"/>
+  <text x="104" y="94" text-anchor="middle" font-family="ui-monospace, 'SF Mono', Menlo, Consolas, monospace" font-size="12.5" font-weight="700" letter-spacing="0.4" fill="#23458f">128</text>
+  <text x="104" y="105.5" text-anchor="middle" font-family="ui-monospace, 'SF Mono', Menlo, Consolas, monospace" font-size="7" letter-spacing="1.8" fill="#23458f" opacity="0.9">BIT</text>
+
+  <!-- eyebrow -->
+  <text x="158" y="46" font-family="ui-monospace, 'SF Mono', Menlo, Consolas, monospace" font-size="10.5" letter-spacing="3.4" fill="#d1584a">MOONBIT · RFC 9562</text>
+
+  <!-- wordmark -->
+  <text x="155" y="102" font-family="Georgia, 'Iowan Old Style', 'Palatino Linotype', 'Times New Roman', serif" font-size="52" font-weight="700" letter-spacing="-1.4" fill="#26221b">moonuuid</text>
+
+  <!-- tagline -->
+  <text x="158" y="146" font-family="Georgia, 'Iowan Old Style', 'Palatino Linotype', 'Times New Roman', serif" font-size="21" font-style="italic" fill="#514a3d">UUIDs, written down.</text>
+
+  <!-- the identifier, one colour per field -->
+  <text x="844" y="145" text-anchor="end" font-family="ui-monospace, 'SF Mono', Menlo, Consolas, monospace" font-size="14" letter-spacing="0.2"><tspan fill="#2b4c96">c232ab00</tspan><tspan fill="#867c68">-</tspan><tspan fill="#b4562f">9414</tspan><tspan fill="#867c68">-</tspan><tspan fill="#9a7412">11ec</tspan><tspan fill="#867c68">-</tspan><tspan fill="#2f7d6d">b3c8</tspan><tspan fill="#867c68">-</tspan><tspan fill="#7a4a86">9f6bdeced846</tspan></text>
+
+  <!-- footer rule -->
+  <path d="M56 166h788" stroke="#26221b" stroke-width="1" opacity="0.16"/>
+
+  <text x="56" y="182" font-family="ui-monospace, 'SF Mono', Menlo, Consolas, monospace" font-size="9" letter-spacing="2.2" fill="#867c68">PARSE ANY SPELLING · WRITE THE CANONICAL ONE · MAKE 1 — 8</text>
+  <text x="844" y="182" text-anchor="end" font-family="ui-monospace, 'SF Mono', Menlo, Consolas, monospace" font-size="9" letter-spacing="2.2" fill="#867c68">128 BITS FIXED WIDTH</text>
+</svg>

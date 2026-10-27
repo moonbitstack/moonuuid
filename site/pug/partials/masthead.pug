@@ -1,0 +1,22 @@
+include mixins.pug
+
+header.masthead
+  .shell.masthead__inner
+    a.brand(href="./" aria-label="moonuuid home")
+      span.seal
+        | 128
+        small BIT
+      span.brand__text
+        span.brand__word moonuuid
+        span.brand__sub identifier notes
+    nav.nav(aria-label="Sections")
+      a(href="./" class={ "is-active": page === "home" } aria-current=(page === "home" ? "page" : undefined)) Home
+      a(href="guide.html" class={ "is-active": page === "guide" } aria-current=(page === "guide" ? "page" : undefined)) Guide
+      a(href="api.html" class={ "is-active": page === "api" } aria-current=(page === "api" ? "page" : undefined)) API
+      a(href="showcase.html" class={ "is-active": page === "showcase" } aria-current=(page === "showcase" ? "page" : undefined)) Anatomy
+    .meta
+      span.edition MoonBit · RFC 9562
+      button.icon-btn(type="button" data-theme-toggle aria-label="Switch theme")
+        +sunmoon()
+      a.icon-btn.gh(href="https://github.com/moonbitstack/moonuuid" aria-label="Repository on GitHub" title="Repository on GitHub")
+        +github()

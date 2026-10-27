@@ -1,0 +1,23 @@
+extends base.pug
+include partials/mixins.pug
+
+block content
+  .shell
+    header.page-head
+      p.kicker field notes · eleven sections
+      h1 A short guide
+      p.lead From the first parse to a generator over your own clock, one runnable block at a time. Every output below is copied from a real run.
+    .guide-layout
+      nav.toc(aria-label="Guide contents")
+        .toc__title Contents
+        each s in guide.sections
+          a(href="#" + s.id)= s.title
+      article.article
+        each s in guide.sections
+          section.guide-section(id=s.id)
+            h2
+              span.no= s.no
+              | #{s.title}
+            .body!= s.body
+            each b in s.blocks
+              +snippet(b)

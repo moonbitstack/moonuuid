@@ -1,33 +1,27 @@
-# moonuuid
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset=".github/assets/header-dark.svg">
+  <img src=".github/assets/header-light.svg" alt="moonuuid — read any spelling, write the canonical one">
+</picture>
 
-**UUIDs for MoonBit.** Read every spelling in use, write the canonical one, and make all eight versions of RFC 9562. Time and randomness come from functions you pass in, so the same code runs on every backend and in every test.
+**[Home](https://moonbitstack.github.io/moonuuid/)** ·
+[Guide](https://moonbitstack.github.io/moonuuid/guide.html) ·
+[API](https://moonbitstack.github.io/moonuuid/api.html) ·
+[Anatomy](https://moonbitstack.github.io/moonuuid/showcase.html) ·
+[mooncakes](https://mooncakes.io/docs/moonbitstack/moonuuid)
+
+UUIDs for MoonBit. Read any spelling in use, write the canonical one, and make ids from a name, from a clock, or from random bytes. Time and randomness come in as functions you pass, so the same code runs on every backend and in every test.
 
 ```moonbit
 let id = @moonuuid.parse("{C232AB00-9414-11EC-B3C8-9F6BDECED846}")
 id.to_string()   // "c232ab00-9414-11ec-b3c8-9f6bdeced846"
 id.version()     // Some(1)
+id.node()        // 175285648414790
 ```
-
----
 
 ## Install
 
 ```bash
 moon add moonbitstack/moonuuid
-```
-
-## Quick start
-
-```moonbit
-// Name-based ids are the same every time.
-let page = @moonuuid.v5(@moonuuid.namespace_url, "https://example.org/")
-
-// Time-ordered ids from a generator over your clock and randomness.
-let gen = @moonuuid.Generator::new(
-  clock=() => now_in_nanoseconds(),
-  random=n => system_random_bytes(n),
-)
-let row = gen.v7()   // sorts in the order made, even within one millisecond
 ```
 
 ## The versions
@@ -42,7 +36,23 @@ let row = gen.v7()   // sorts in the order made, even within one millisecond
 | 7 | Unix milliseconds, a counter and random bits | `v7(millis~, random)` · `gen.v7()` | ✓ |
 | 8 | 122 bits of your own layout | `v8(custom)` | |
 
+Those are the seven versions RFC 9562 defines. Version 2 is reserved for DCE security and is not generated.
+
 `ticks_of(unix_nanos)` turns nanoseconds since 1970 into the 100-nanosecond intervals since 1582 that versions 1 and 6 count. The namespaces are `namespace_dns`, `namespace_url`, `namespace_oid` and `namespace_x500`; `nil` and `max` are all zeros and all ones.
+
+## Quick start
+
+```moonbit
+// Name-based ids are the same every time.
+let page = @moonuuid.v5(@moonuuid.namespace_url, "https://example.org/")
+
+// Time-ordered ids from a generator over your clock and randomness.
+let gen = @moonuuid.Generator::new(
+  clock=() => now_in_nanoseconds(),
+  random=n => system_random_bytes(n),
+)
+let row = gen.v7()   // sorts in the order made, even within one millisecond
+```
 
 ## Reading and writing
 
@@ -86,6 +96,10 @@ let row = gen.v7()   // sorts in the order made, even within one millisecond
 |:--|:--|
 | `Malformed(at~, reason~)` | text that is not 32 hexadecimal digits; `at` is where it went wrong |
 | `Size(want~, got~)` | bytes, or a random source, of the wrong length |
+
+## Runnable examples
+
+Two programs in the repository: `moon run src/examples/01-ids` stands in a clock and a random source, and `moon run src/examples/02-tour` prints one line per feature.
 
 ## Licence
 

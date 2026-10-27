@@ -3,3 +3,8 @@
 !.moonignore
 _*
 target/
+
+# site toolchain and build output
+site/node_modules/
+docs/assets/
+site/content/api-body.mjs
