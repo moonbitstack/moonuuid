@@ -3,8 +3,10 @@
 !.moonignore
 _*
 target/
-
-# site toolchain and build output
+*.lock
+package-lock.json
+pnpm-lock.yaml
+yarn.lock
 site/node_modules/
 docs/assets/
 site/content/api-body.mjs

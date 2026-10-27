@@ -18,67 +18,46 @@ permissions:
 
 concurrency:
   group: pages
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
+  deploy:
+    runs-on: ubuntu-26.04
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v7
         with:
           persist-credentials: false
 
-      - name: install moonbit
+      - name: install moon
         run: |
           curl -fsSL https://cli.moonbitlang.com/install/unix.sh | bash
           echo "$HOME/.moon/bin" >> $GITHUB_PATH
 
-      - name: moon version
-        run: |
-          moon version --all
-          moon update
-
-      # The package the docs demo with, compiled to a self-contained ESM.
-      - name: build the browser bundle
-        run: moon build --target js --release src/jsapi
-
       - uses: actions/setup-node@v7
         with:
-          node-version: 22
-          cache: npm
-          cache-dependency-path: site/package-lock.json
+          node-version: lts/*
 
-      - name: install site toolchain
-        run: npm ci
-        working-directory: site
+      - name: build the site
+        run: |
+          moon update
+          moon build --target js --release src/examples/browser
+          python3 scripts/gen_api.py
+          (cd site && npm install --no-audit --no-fund && npm run check && npm run build)
+          git diff --exit-code docs/api.html
 
-      - name: typecheck the site
-        run: npm run check
-        working-directory: site
+      - name: configure pages
+        uses: actions/configure-pages@v6
+        with:
+          enablement: true
 
-      # The reference body is generated from the sources, so it cannot drift.
-      - name: generate the reference
-        run: python3 scripts/gen_api.py
-
-      - name: render the site
-        run: npm run build
-        working-directory: site
-
-      - name: the reference is up to date
-        run: git diff --exit-code docs/api.html
-
-      - uses: actions/configure-pages@v6
-
-      - uses: actions/upload-pages-artifact@v5
+      - name: upload the site
+        uses: actions/upload-pages-artifact@v5
         with:
           path: docs
 
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - id: deployment
+      - name: deploy
+        id: deployment
         uses: actions/deploy-pages@v5

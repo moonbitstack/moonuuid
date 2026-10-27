@@ -2279,3 +2279,5 @@ $turn: 4px; // vertical distance of one twist; $strand / cos(60deg)
     min-height: 58px;
   }
 }
+
+html, button, input, textarea, select { font-variant-ligatures: no-contextual; }

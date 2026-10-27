@@ -45,8 +45,8 @@ for (const name of ["theme.js", "rail.js"]) {
 
 /* 4. the compiled library, if it has been built ------------------------- */
 const candidates = [
-  path.join(root, "_build", "js", "release", "build", "jsapi", "jsapi.js"),
-  path.join(root, "_build", "js", "debug", "build", "jsapi", "jsapi.js"),
+  path.join(root, "_build", "js", "release", "build", "examples", "browser", "browser.js"),
+  path.join(root, "_build", "js", "debug", "build", "examples", "browser", "browser.js"),
 ];
 const lib = candidates.find((candidate) => existsSync(candidate));
 if (lib) {
@@ -54,7 +54,7 @@ if (lib) {
   console.log("lib   <- " + path.relative(root, lib));
 } else {
   console.warn(
-    "lib   ! jsapi not built. Run: moon build --target js --release src/jsapi"
+    "lib   ! the browser example is not built. Run: moon build --target js --release src/examples/browser"
   );
 }
 
