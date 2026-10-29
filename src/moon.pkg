@@ -3,4 +3,5 @@ import {
   "moonbitstack/mooncrypt/hash/sha1",
   "moonbitlang/core/encoding/utf8",
   "moonbitlang/core/json",
+  "moonbitstack/moonrand",
 }

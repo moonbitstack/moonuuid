@@ -56,24 +56,26 @@ Rfc
 13256
 175285648414790</code></pre></div></section><section class="guide-section" id="generator"><h2><span class="no">06</span>A clock and a random source</h2><div class="body"><p>The library never reaches for the clock or for randomness.
       <code>Generator::new</code> takes a clock that gives nanoseconds since 1970 and a
-      source that gives a number of random bytes. It keeps what the time-based versions
-      need between calls. Here both are fixed, so every run prints the same lines.</p></div><div class="snippet"><div class="snippet__head"><span class="snippet__lang">moonbit</span><button class="snippet__copy" type="button" data-copy="snippet">Copy</button></div><pre><code class="lang-moonbit"><span class="tok-k">fn</span> main <span class="tok-k">raise</span> {
+      random source, a moonrand <code>Source</code>: <code>@system.source</code> from
+      <code>moonrand/system</code> in a program. It keeps what the time-based versions need
+      between calls. Here the clock is fixed and the source replays fixed bytes, so every
+      run prints the same lines.</p></div><div class="snippet"><div class="snippet__head"><span class="snippet__lang">moonbit</span><button class="snippet__copy" type="button" data-copy="snippet">Copy</button></div><pre><code class="lang-moonbit"><span class="tok-k">fn</span> main <span class="tok-k">raise</span> {
   <span class="tok-k">let</span> gen = <span class="tok-p">@moonuuid</span>.<span class="tok-t">Generator</span>::new(
     clock=() =&gt; <span class="tok-n">1_761_350_400_000_000_000L</span>,
-    random=n =&gt; <span class="tok-t">Bytes</span>::makei(n, i =&gt; (i * <span class="tok-n">37</span> + <span class="tok-n">11</span>).to_byte()),
+    random=<span class="tok-p">@moonrand</span>.<span class="tok-t">Replay</span>::new(<span class="tok-t">Bytes</span>::makei(<span class="tok-n">64</span>, i =&gt; (i * <span class="tok-n">37</span> + <span class="tok-n">11</span>).to_byte())),
   )
   println(gen.v4())
 }</code></pre></div><div class="out"><div class="out__label">prints</div><pre><code>0b30557a-9fc4-490e-b358-7da2c7ec1136</code></pre></div><div class="snippet"><div class="snippet__head"><span class="snippet__lang">moonbit</span><button class="snippet__copy" type="button" data-copy="snippet">Copy</button></div><pre><code class="lang-moonbit"><span class="tok-k">fn</span> main <span class="tok-k">raise</span> {
   <span class="tok-k">let</span> gen = <span class="tok-p">@moonuuid</span>.<span class="tok-t">Generator</span>::new(
     clock=() =&gt; <span class="tok-n">1_761_350_400_000_000_000L</span>,
-    random=n =&gt; <span class="tok-t">Bytes</span>::makei(n, i =&gt; (i * <span class="tok-n">37</span> + <span class="tok-n">11</span>).to_byte()),
+    random=<span class="tok-p">@moonrand</span>.<span class="tok-t">Replay</span>::new(<span class="tok-t">Bytes</span>::makei(<span class="tok-n">64</span>, i =&gt; (i * <span class="tok-n">37</span> + <span class="tok-n">11</span>).to_byte())),
   )
   <span class="tok-k">for</span> _ <span class="tok-k">in</span> <span class="tok-n">0</span>..&lt;<span class="tok-n">3</span> {
     println(gen.v7())
   }
 }</code></pre></div><div class="out"><div class="out__label">prints</div><pre><code>019a18aa-3800-74c1-957a-9fc4e90e3358
-019a18aa-3800-74c1-957a-9fc50b30557a
-019a18aa-3800-74c1-957a-9fc60b30557a</code></pre></div><p class="guide-note">Within one millisecond the counter goes up with a fresh random tail. A clock
+019a18aa-3800-74c1-957a-9fc57da2c7ec
+019a18aa-3800-74c1-957a-9fc611365b80</code></pre></div><p class="guide-note">Within one millisecond the counter goes up with a fresh random tail. A clock
           that steps back uses the millisecond after the last one, so the order holds.</p></section><section class="guide-section" id="time"><h2><span class="no">07</span>Time-based, field by field</h2><div class="body"><p><code>ticks_of</code> turns nanoseconds since 1970 into the 100-nanosecond
       intervals since 1582 that versions 1 and 6 count. Version 6 lays the timestamp's
       high bits first, so identifiers sort in the order they were made; version 1 keeps

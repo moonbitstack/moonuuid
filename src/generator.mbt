@@ -5,7 +5,7 @@
 /// made within one millisecond count up, so they sort in the order made.
 pub struct Generator {
   priv clock : () -> Int64
-  priv random : (Int32) -> Bytes
+  priv random : &@moonrand.Source
   priv mut last_ticks : Int64?
   priv mut last_ticks_v6 : Int64?
   priv mut last_millis : Int64?
@@ -13,11 +13,12 @@ pub struct Generator {
 }
 
 ///|
-/// `clock` gives nanoseconds since 1970; `random` gives that many random
-/// bytes.
+/// `clock` gives nanoseconds since 1970; `random` is where the random bits
+/// come from: `@system.source` from `moonrand/system` in a program, or a
+/// `Replay` of fixed bytes in a test that wants the same ids every run.
 pub fn Generator::new(
   clock~ : () -> Int64,
-  random~ : (Int32) -> Bytes,
+  random~ : &@moonrand.Source,
 ) -> Generator {
   {
     clock,
@@ -31,11 +32,9 @@ pub fn Generator::new(
 
 ///|
 fn Generator::bytes(self : Generator, n : Int32) -> Bytes raise Refused {
-  let got = (self.random)(n)
-  if got.length() != n {
-    raise Size(want=n, got=got.length())
+  @moonrand.bytes(n, self.random) catch {
+    why => raise Random(why)
   }
-  got
 }
 
 ///|

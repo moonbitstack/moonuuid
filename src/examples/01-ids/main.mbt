@@ -4,17 +4,16 @@
 fn main {
   let now = Ref(1_761_350_400_000_000_000L)
   let seed = Ref(7)
+  let stream = Bytes::makei(256, i => {
+    seed.val = (seed.val * 1103515245 + 12345) & 0x7FFFFFFF
+    (seed.val >> (i % 3 * 8)).to_byte()
+  })
   let gen = @moonuuid.Generator::new(
     clock=() => {
       now.val += 400_000L
       now.val
     },
-    random=n => {
-      Bytes::makei(n, i => {
-        seed.val = (seed.val * 1103515245 + 12345) & 0x7FFFFFFF
-        (seed.val >> (i % 3 * 8)).to_byte()
-      })
-    },
+    random=@moonrand.Replay::new(stream),
   )
   try {
     println("v7, in the order made:")

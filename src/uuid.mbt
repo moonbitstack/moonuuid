@@ -27,6 +27,8 @@ pub(all) suberror Refused {
   Malformed(at~ : Int32, reason~ : String)
   /// Bytes of the wrong length.
   Size(want~ : Int32, got~ : Int32)
+  /// The generator's random source could not give what an identifier needs.
+  Random(@moonrand.Unavailable)
 } derive(Eq, Debug)
 
 ///|
@@ -41,6 +43,7 @@ pub impl Show for Refused with fn output(self, logger) {
     match self {
       Malformed(at~, reason~) => "\{reason} at \{at}"
       Size(want~, got~) => "\{want} bytes wanted, \{got} given"
+      Random(why) => "no randomness: \{why}"
     },
   )
 }

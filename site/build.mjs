@@ -65,7 +65,7 @@ const pages = [
     out: "index.html",
     page: "home",
     title: "moonuuid — UUIDs for MoonBit",
-    desc: "Read every spelling of a UUID, write the canonical one, and make ids from a name, a clock or random bytes you supply.",
+    desc: "Read every spelling of a UUID, write the canonical one, and make ids from a name, a clock or a random source you supply.",
   },
   {
     file: "guide.pug",

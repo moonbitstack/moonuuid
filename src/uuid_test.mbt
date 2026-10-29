@@ -126,9 +126,10 @@ test "random and custom versions keep only their payload bits" {
 
 ///|
 test "a generator's time-based ids never repeat a timestamp" {
-  let gen = @moonuuid.Generator::new(clock=() => 1_000_000_000L, random=n => {
-    Bytes::make(n, b'\x5A')
-  })
+  let gen = @moonuuid.Generator::new(
+    clock=() => 1_000_000_000L,
+    random=@moonrand.Replay::new(Bytes::make(64, b'\x5A')),
+  )
   let a = gen.v1(node=1L)
   let b = gen.v1(node=1L)
   assert_eq(b.time() - a.time(), 1L)
@@ -141,13 +142,16 @@ test "a generator's time-based ids never repeat a timestamp" {
 }
 
 ///|
-test "a random source that gives the wrong length is refused" {
-  let gen = @moonuuid.Generator::new(clock=() => 0L, random=_ => b"\x01")
+test "a random source that runs dry is refused" {
+  let gen = @moonuuid.Generator::new(
+    clock=() => 0L,
+    random=@moonrand.Replay::new(b"\x01"),
+  )
   let got = try {
     ignore(gen.v7())
     "made"
   } catch {
     e => e.to_string()
   }
-  assert_eq(got, "10 bytes wanted, 1 given")
+  assert_eq(got, "no randomness: the replay source is exhausted")
 }

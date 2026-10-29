@@ -36,10 +36,11 @@ fn main raise {
   println(id.clock_seq())
   println(id.node())
 
-  // A generator over a fixed clock and a counting random source.
-  let gen = @moonuuid.Generator::new(clock=() => 1_761_350_400_000_000_000L, random=n => {
-    Bytes::makei(n, i => (i * 37 + 11).to_byte())
-  })
+  // A generator over a fixed clock and a replayed random source.
+  let gen = @moonuuid.Generator::new(
+    clock=() => 1_761_350_400_000_000_000L,
+    random=@moonrand.Replay::new(Bytes::makei(64, i => (i * 37 + 11).to_byte())),
+  )
   println("-- v4 --")
   println(gen.v4())
   println("-- v7 --")

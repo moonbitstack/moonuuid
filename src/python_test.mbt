@@ -508,16 +508,12 @@ test "python generator v7 steady" {
     b"\x4a\x55\x60\x6b\x76\x81\x8c\x97\xa2\xad", b"\x6f\x7a\x85\x90\x9b\xa6\xb1\xbc\xc7\xd2",
   ]
   let t = Ref(0)
-  let r = Ref(0)
   let gen = @moonuuid.Generator::new(
     clock=() => {
       t.val += 1
       clock[t.val - 1]
     },
-    random=_ => {
-      r.val += 1
-      draws[r.val - 1]
-    },
+    random=@moonrand.Replay::new(draws.fold(init=b"", (all, d) => all + d)),
   )
   let got = []
   for _ in clock {
@@ -540,16 +536,12 @@ test "python generator v7 same millisecond" {
     b"\x6f\x7a\x85\x90", b"\x94\x9f\xaa\xb5",
   ]
   let t = Ref(0)
-  let r = Ref(0)
   let gen = @moonuuid.Generator::new(
     clock=() => {
       t.val += 1
       clock[t.val - 1]
     },
-    random=_ => {
-      r.val += 1
-      draws[r.val - 1]
-    },
+    random=@moonrand.Replay::new(draws.fold(init=b"", (all, d) => all + d)),
   )
   let got = []
   for _ in clock {
@@ -572,16 +564,12 @@ test "python generator v7 clock steps back" {
     b"\x6f\x7a\x85\x90\x9b\xa6\xb1\xbc\xc7\xd2",
   ]
   let t = Ref(0)
-  let r = Ref(0)
   let gen = @moonuuid.Generator::new(
     clock=() => {
       t.val += 1
       clock[t.val - 1]
     },
-    random=_ => {
-      r.val += 1
-      draws[r.val - 1]
-    },
+    random=@moonrand.Replay::new(draws.fold(init=b"", (all, d) => all + d)),
   )
   let got = []
   for _ in clock {

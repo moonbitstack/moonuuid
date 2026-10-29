@@ -4,4 +4,6 @@ supported_targets = "js"
 
 import {
   "moonbitstack/moonuuid",
+  "moonbitstack/moonrand",
+  "moonbitstack/moonrand/system",
 }

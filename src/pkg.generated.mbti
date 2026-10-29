@@ -4,6 +4,7 @@ package "moonbitstack/moonuuid"
 import {
   "moonbitlang/core/debug",
   "moonbitlang/core/json",
+  "moonbitstack/moonrand",
 }
 
 // Values
@@ -43,6 +44,7 @@ pub fn v8(BytesView) -> Uuid raise Refused
 pub(all) suberror Refused {
   Malformed(at~ : Int32, reason~ : String)
   Size(want~ : Int32, got~ : Int32)
+  Random(@moonrand.Unavailable)
 } derive(Eq, @debug.Debug)
 pub fn Refused::equal(Self, Self) -> Bool
 pub fn Refused::not_equal(Self, Self) -> Bool
@@ -55,7 +57,7 @@ pub impl Show for Refused
 pub struct Generator {
   // private fields
 }
-pub fn Generator::new(clock~ : () -> Int64, random~ : (Int32) -> Bytes) -> Self
+pub fn Generator::new(clock~ : () -> Int64, random~ : &@moonrand.Source) -> Self
 pub fn Generator::v1(Self, node~ : Int64, clock_seq? : Int32) -> Uuid raise Refused
 pub fn Generator::v4(Self) -> Uuid raise Refused
 pub fn Generator::v6(Self, node~ : Int64, clock_seq? : Int32) -> Uuid raise Refused

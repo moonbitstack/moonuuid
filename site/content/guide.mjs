@@ -120,15 +120,17 @@ Rfc
     title: "A clock and a random source",
     body: `<p>The library never reaches for the clock or for randomness.
       <code>Generator::new</code> takes a clock that gives nanoseconds since 1970 and a
-      source that gives a number of random bytes. It keeps what the time-based versions
-      need between calls. Here both are fixed, so every run prints the same lines.</p>`,
+      random source, a moonrand <code>Source</code>: <code>@system.source</code> from
+      <code>moonrand/system</code> in a program. It keeps what the time-based versions need
+      between calls. Here the clock is fixed and the source replays fixed bytes, so every
+      run prints the same lines.</p>`,
     blocks: [
       {
         lang: "moonbit",
         code: `fn main raise {
   let gen = @moonuuid.Generator::new(
     clock=() => 1_761_350_400_000_000_000L,
-    random=n => Bytes::makei(n, i => (i * 37 + 11).to_byte()),
+    random=@moonrand.Replay::new(Bytes::makei(64, i => (i * 37 + 11).to_byte())),
   )
   println(gen.v4())
 }`,
@@ -139,15 +141,15 @@ Rfc
         code: `fn main raise {
   let gen = @moonuuid.Generator::new(
     clock=() => 1_761_350_400_000_000_000L,
-    random=n => Bytes::makei(n, i => (i * 37 + 11).to_byte()),
+    random=@moonrand.Replay::new(Bytes::makei(64, i => (i * 37 + 11).to_byte())),
   )
   for _ in 0..<3 {
     println(gen.v7())
   }
 }`,
         out: `019a18aa-3800-74c1-957a-9fc4e90e3358
-019a18aa-3800-74c1-957a-9fc50b30557a
-019a18aa-3800-74c1-957a-9fc60b30557a`,
+019a18aa-3800-74c1-957a-9fc57da2c7ec
+019a18aa-3800-74c1-957a-9fc611365b80`,
         note: `Within one millisecond the counter goes up with a fresh random tail. A clock
           that steps back uses the millisecond after the last one, so the order holds.`,
       },

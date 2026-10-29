@@ -22,6 +22,7 @@ id.node()        // 175285648414790
 
 ```bash
 moon add moonbitstack/moonuuid
+moon add moonbitstack/moonrand   # the random source a generator draws from
 ```
 
 ## The versions
@@ -49,7 +50,7 @@ let page = @moonuuid.v5(@moonuuid.namespace_url, "https://example.org/")
 // Time-ordered ids from a generator over your clock and randomness.
 let gen = @moonuuid.Generator::new(
   clock=() => now_in_nanoseconds(),
-  random=n => system_random_bytes(n),
+  random=@system.source,
 )
 let row = gen.v7()   // sorts in the order made, even within one millisecond
 ```
@@ -85,7 +86,7 @@ let row = gen.v7()   // sorts in the order made, even within one millisecond
 
 ## The generator
 
-`Generator::new(clock~, random~)` keeps what the time-based versions need between calls. `clock` gives nanoseconds since 1970 and `random` gives a number of random bytes.
+`Generator::new(clock~, random~)` keeps what the time-based versions need between calls. `clock` gives nanoseconds since 1970 and `random` is a moonrand `Source`: `@system.source` from `moonbitstack/moonrand/system` in a program, a `Replay` of fixed bytes in a test. A source that cannot give what an id needs is `Refused::Random`.
 
 - Version 1 and 6 timestamps never repeat or go back; the clock sequence is random unless you pass one.
 - Version 7 ids made within one millisecond count up with a fresh random tail. If the clock steps back, the next id uses the millisecond after the last one, so the order holds.
@@ -95,7 +96,8 @@ let row = gen.v7()   // sorts in the order made, even within one millisecond
 | `Refused` | When |
 |:--|:--|
 | `Malformed(at~, reason~)` | text that is not 32 hexadecimal digits; `at` is where it went wrong |
-| `Size(want~, got~)` | bytes, or a random source, of the wrong length |
+| `Size(want~, got~)` | bytes of the wrong length |
+| `Random(why)` | the generator's random source could not give what an id needs |
 
 ## Runnable examples
 

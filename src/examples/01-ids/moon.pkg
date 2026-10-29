@@ -2,4 +2,5 @@ pkgtype(kind: "executable")
 
 import {
   "moonbitstack/moonuuid",
+  "moonbitstack/moonrand",
 }
