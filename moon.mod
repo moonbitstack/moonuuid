@@ -1,6 +1,6 @@
 name = "moonbitstack/moonuuid"
 
-version = "0.1.1"
+version = "0.1.2"
 
 readme = "README.md"
 
@@ -15,7 +15,7 @@ description = "UUIDs for MoonBit: parsing and versions 1 to 8."
 source = "src"
 
 import {
-  "moonbitstack/mooncrypt@0.4.4",
+  "moonbitstack/mooncrypt@0.4.5",
   "moonbitstack/moonrand@0.1.0",
 }
 
