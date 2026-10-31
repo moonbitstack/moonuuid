@@ -28,7 +28,7 @@ pub(all) suberror Refused {
   /// Bytes of the wrong length.
   Size(want~ : Int32, got~ : Int32)
   /// The generator's random source could not give what an identifier needs.
-  Random(@moonrand.Unavailable)
+  Random(@moonseed.Unavailable)
 } derive(Eq, Debug)
 
 ///|

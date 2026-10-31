@@ -1,6 +1,6 @@
 name = "moonbitstack/moonuuid"
 
-version = "0.1.2"
+version = "0.1.3"
 
 readme = "README.md"
 
@@ -15,8 +15,8 @@ description = "UUIDs for MoonBit: parsing and versions 1 to 8."
 source = "src"
 
 import {
-  "moonbitstack/mooncrypt@0.4.5",
-  "moonbitstack/moonrand@0.1.0",
+  "moonbitstack/mooncrypt@0.4.6",
+  "moonbitstack/moonseed@0.1.0",
 }
 
 preferred_target = "wasm-gc"

@@ -13,7 +13,7 @@ fn main {
       now.val += 400_000L
       now.val
     },
-    random=@moonrand.Replay::new(stream),
+    random=@moonseed.Replay::new(stream),
   )
   try {
     println("v7, in the order made:")

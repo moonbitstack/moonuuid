@@ -120,8 +120,8 @@ Rfc
     title: "A clock and a random source",
     body: `<p>The library never reaches for the clock or for randomness.
       <code>Generator::new</code> takes a clock that gives nanoseconds since 1970 and a
-      random source, a moonrand <code>Source</code>: <code>@system.source</code> from
-      <code>moonrand/system</code> in a program. It keeps what the time-based versions need
+      random source, a moonseed <code>Source</code>: <code>@system.source</code> from
+      <code>moonseed/system</code> in a program. It keeps what the time-based versions need
       between calls. Here the clock is fixed and the source replays fixed bytes, so every
       run prints the same lines.</p>`,
     blocks: [
@@ -130,7 +130,7 @@ Rfc
         code: `fn main raise {
   let gen = @moonuuid.Generator::new(
     clock=() => 1_761_350_400_000_000_000L,
-    random=@moonrand.Replay::new(Bytes::makei(64, i => (i * 37 + 11).to_byte())),
+    random=@moonseed.Replay::new(Bytes::makei(64, i => (i * 37 + 11).to_byte())),
   )
   println(gen.v4())
 }`,
@@ -141,7 +141,7 @@ Rfc
         code: `fn main raise {
   let gen = @moonuuid.Generator::new(
     clock=() => 1_761_350_400_000_000_000L,
-    random=@moonrand.Replay::new(Bytes::makei(64, i => (i * 37 + 11).to_byte())),
+    random=@moonseed.Replay::new(Bytes::makei(64, i => (i * 37 + 11).to_byte())),
   )
   for _ in 0..<3 {
     println(gen.v7())

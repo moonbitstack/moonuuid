@@ -6,7 +6,7 @@
 /// it, so a generated identifier and a pasted one describe themselves the
 /// same way.
 ///
-/// The clock is the host's `Date.now`, the randomness moonrand's system
+/// The clock is the host's `Date.now`, the randomness moonseed's system
 /// source; nothing here is seeded, so the page shows the same behaviour a real
 /// caller would get.
 
@@ -199,7 +199,7 @@ pub fn make_v7() -> String {
 /// Version 8 from 16 random bytes, version and variant written over.
 #export_name("make_v8")
 pub fn make_v8() -> String {
-  let random = @moonrand.bytes(16, @system.source) catch {
+  let random = @moonseed.bytes(16, @system.source) catch {
     why => return refused_json(@moonuuid.Random(why))
   }
   describe_json(@moonuuid.v8(random)) catch {

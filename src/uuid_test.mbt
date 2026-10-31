@@ -128,7 +128,7 @@ test "random and custom versions keep only their payload bits" {
 test "a generator's time-based ids never repeat a timestamp" {
   let gen = @moonuuid.Generator::new(
     clock=() => 1_000_000_000L,
-    random=@moonrand.Replay::new(Bytes::make(64, b'\x5A')),
+    random=@moonseed.Replay::new(Bytes::make(64, b'\x5A')),
   )
   let a = gen.v1(node=1L)
   let b = gen.v1(node=1L)
@@ -145,7 +145,7 @@ test "a generator's time-based ids never repeat a timestamp" {
 test "a random source that runs dry is refused" {
   let gen = @moonuuid.Generator::new(
     clock=() => 0L,
-    random=@moonrand.Replay::new(b"\x01"),
+    random=@moonseed.Replay::new(b"\x01"),
   )
   let got = try {
     ignore(gen.v7())

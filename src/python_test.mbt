@@ -513,7 +513,7 @@ test "python generator v7 steady" {
       t.val += 1
       clock[t.val - 1]
     },
-    random=@moonrand.Replay::new(draws.fold(init=b"", (all, d) => all + d)),
+    random=@moonseed.Replay::new(draws.fold(init=b"", (all, d) => all + d)),
   )
   let got = []
   for _ in clock {
@@ -541,7 +541,7 @@ test "python generator v7 same millisecond" {
       t.val += 1
       clock[t.val - 1]
     },
-    random=@moonrand.Replay::new(draws.fold(init=b"", (all, d) => all + d)),
+    random=@moonseed.Replay::new(draws.fold(init=b"", (all, d) => all + d)),
   )
   let got = []
   for _ in clock {
@@ -569,7 +569,7 @@ test "python generator v7 clock steps back" {
       t.val += 1
       clock[t.val - 1]
     },
-    random=@moonrand.Replay::new(draws.fold(init=b"", (all, d) => all + d)),
+    random=@moonseed.Replay::new(draws.fold(init=b"", (all, d) => all + d)),
   )
   let got = []
   for _ in clock {
