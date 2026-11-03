@@ -1,2 +1,4 @@
-# the pages are generated; keep them LF on every checkout so a rebuild diffs clean
-docs/*.html text eol=lf
+* text=auto eol=lf
+*.mbt text eol=lf
+*.mbti text eol=lf
+*.py text eol=lf
