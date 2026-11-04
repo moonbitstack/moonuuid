@@ -41,11 +41,12 @@ pub fn v7(millis~ : Int64, BytesView) -> Uuid raise Refused
 pub fn v8(BytesView) -> Uuid raise Refused
 
 // Errors
+#derive(Eq, @debug.Debug)
 pub(all) suberror Refused {
   Malformed(at~ : Int32, reason~ : String)
   Size(want~ : Int32, got~ : Int32)
   Random(@moonseed.Unavailable)
-} derive(Eq, @debug.Debug)
+}
 pub fn Refused::equal(Self, Self) -> Bool
 pub fn Refused::not_equal(Self, Self) -> Bool
 pub fn Refused::output(Self, &Logger) -> Unit
@@ -63,14 +64,15 @@ pub fn Generator::v4(Self) -> Uuid raise Refused
 pub fn Generator::v6(Self, node~ : Int64, clock_seq? : Int32) -> Uuid raise Refused
 pub fn Generator::v7(Self) -> Uuid raise Refused
 
+#derive(Compare, Eq, Hash, @debug.Debug)
 pub struct Uuid {
   // private fields
-} derive(Compare, Eq, Hash, @debug.Debug)
+}
 pub fn Uuid::bytes(Self) -> Bytes
 pub fn Uuid::clock_seq(Self) -> Int32
 pub fn Uuid::compare(Self, Self) -> Int32
 pub fn Uuid::equal(Self, Self) -> Bool
-pub fn Uuid::from_json(Json, @json.JsonPath) -> Self raise @json.JsonDecodeError
+pub fn Uuid::from_json(@json.Json, @json.JsonPath) -> Self raise @json.JsonDecodeError
 pub fn Uuid::hash(Self) -> Int32
 pub fn Uuid::hash_combine(Self, Hasher) -> Unit
 pub fn Uuid::hex(Self) -> String
@@ -85,22 +87,23 @@ pub fn Uuid::op_lt(Self, Self) -> Bool
 pub fn Uuid::output(Self, &Logger) -> Unit
 pub fn Uuid::parts(Self) -> (UInt64, UInt64)
 pub fn Uuid::time(Self) -> Int64
-pub fn Uuid::to_json(Self) -> Json
+pub fn Uuid::to_json(Self) -> @json.Json
 pub fn Uuid::to_repr(Self) -> @debug.Repr
 pub fn Uuid::to_string(Self) -> String
 pub fn Uuid::urn(Self) -> String
 pub fn Uuid::variant(Self) -> Variant
 pub fn Uuid::version(Self) -> Int32?
 pub impl Show for Uuid
-pub impl ToJson for Uuid
 pub impl @json.FromJson for Uuid
+pub impl @json.ToJson for Uuid
 
+#derive(Eq, @debug.Debug)
 pub(all) enum Variant {
   Ncs
   Rfc
   Microsoft
   Future
-} derive(Eq, @debug.Debug)
+}
 pub fn Variant::equal(Self, Self) -> Bool
 pub fn Variant::not_equal(Self, Self) -> Bool
 pub fn Variant::output(Self, &Logger) -> Unit

@@ -2,10 +2,11 @@
 /// A 128-bit identifier as RFC 9562 lays it out. Compared, hashed and
 /// ordered by its bytes, so a sorted list of time-ordered ids is in time
 /// order.
+#derive(Eq, Compare, Hash, Debug)
 pub struct Uuid {
   priv hi : UInt64
   priv lo : UInt64
-} derive(Eq, Compare, Hash, Debug)
+}
 
 ///|
 pub extend Uuid with Eq::{equal, not_equal}
@@ -21,6 +22,7 @@ pub extend Uuid with Debug::{to_repr}
 
 ///|
 /// Why text or bytes are not a UUID.
+#derive(Eq, Debug)
 pub(all) suberror Refused {
   /// Text that is not 32 hexadecimal digits once braces, hyphens and the
   /// `urn:uuid:` prefix are set aside; `at` is the offending character.
@@ -29,7 +31,7 @@ pub(all) suberror Refused {
   Size(want~ : Int32, got~ : Int32)
   /// The generator's random source could not give what an identifier needs.
   Random(@moonseed.Unavailable)
-} derive(Eq, Debug)
+}
 
 ///|
 pub extend Refused with Eq::{equal, not_equal}
@@ -53,6 +55,7 @@ pub extend Refused with Show::{output, to_string}
 
 ///|
 /// Who an identifier's variant bits say it belongs to.
+#derive(Eq, Debug)
 pub(all) enum Variant {
   /// Reserved for NCS backward compatibility.
   Ncs
@@ -62,7 +65,7 @@ pub(all) enum Variant {
   Microsoft
   /// Reserved for future definition.
   Future
-} derive(Eq, Debug)
+}
 
 ///|
 pub extend Variant with Eq::{equal, not_equal}
