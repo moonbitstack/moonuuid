@@ -13,9 +13,9 @@ UUIDs for MoonBit. Read any spelling in use, write the canonical one, and make i
 
 ```moonbit
 let id = @moonuuid.parse("{C232AB00-9414-11EC-B3C8-9F6BDECED846}")
-id.to_string()   // "c232ab00-9414-11ec-b3c8-9f6bdeced846"
-id.version()     // Some(1)
-id.node()        // 175285648414790
+assert_eq(id.to_string(), "c232ab00-9414-11ec-b3c8-9f6bdeced846")
+assert_eq(id.version(), Some(1))
+assert_eq(id.node(), 175285648414790L)
 ```
 
 ## Install
@@ -46,13 +46,15 @@ Those are the seven versions RFC 9562 defines. Version 2 is reserved for DCE sec
 ```moonbit
 // Name-based ids are the same every time.
 let page = @moonuuid.v5(@moonuuid.namespace_url, "https://example.org/")
+assert_eq(page.version(), Some(5))
 
 // Time-ordered ids from a generator over your clock and randomness.
 let gen = @moonuuid.Generator::new(
-  clock=() => now_in_nanoseconds(),
+  clock=() => (@env.now() * 1_000_000UL).reinterpret_as_int64(), // nanoseconds since 1970
   random=@system.source,
 )
-let row = gen.v7()   // sorts in the order made, even within one millisecond
+let row = gen.v7() // sorts in the order made, even within one millisecond
+println(row)
 ```
 
 ## Reading and writing
@@ -60,8 +62,10 @@ let row = gen.v7()   // sorts in the order made, even within one millisecond
 `parse` takes the canonical form, any case, with or without hyphens, in braces, or after `urn:uuid:`:
 
 ```moonbit
-@moonuuid.parse("6ba7b8109dad11d180b400c04fd430c8")
-@moonuuid.parse("urn:uuid:6ba7b810-9dad-11d1-80b4-00c04fd430c8")
+assert_eq(
+  @moonuuid.parse("6ba7b8109dad11d180b400c04fd430c8"),
+  @moonuuid.parse("urn:uuid:6ba7b810-9dad-11d1-80b4-00c04fd430c8"),
+)
 ```
 
 | Write | Gives |
