@@ -130,20 +130,9 @@ pub fn Uuid::bytes(self : Uuid) -> Bytes {
 }
 
 ///|
-let hex_digits : String = "0123456789abcdef"
-
-///|
 /// The 32 hexadecimal digits, lowercase, without hyphens.
 pub fn Uuid::hex(self : Uuid) -> String {
-  let out = StringBuilder()
-  for word in [self.hi, self.lo] {
-    for shift = 60; shift >= 0; shift = shift - 4 {
-      out.write_char(
-        hex_digits[((word >> shift) & 0xFUL).to_int()].unsafe_to_char(),
-      )
-    }
-  }
-  out.to_string()
+  @base16.encode(self.bytes())
 }
 
 ///|
@@ -165,16 +154,6 @@ pub impl Show for Uuid with fn output(self, logger) {
 pub extend Uuid with Show::{output, to_string}
 
 ///|
-fn hex_value(c : Char) -> Int32? {
-  match c {
-    '0'..<='9' => Some(c.to_int() - '0'.to_int())
-    'a'..<='f' => Some(c.to_int() - 'a'.to_int() + 10)
-    'A'..<='F' => Some(c.to_int() - 'A'.to_int() + 10)
-    _ => None
-  }
-}
-
-///|
 /// Text in any of the spellings in use: canonical, with or without
 /// hyphens, in braces, with the `urn:uuid:` prefix; any case.
 pub fn parse(text : StringView) -> Uuid raise Refused {
@@ -194,34 +173,36 @@ pub fn parse(text : StringView) -> Uuid raise Refused {
   while end > start && chars[end - 1] == '}' {
     end -= 1
   }
-  let mut hi = 0UL
-  let mut lo = 0UL
-  let mut digits = 0
+  // The digits alone are handed to the codec, so `places` keeps where each
+  // one sat in the caller's text: a refusal names the character they wrote.
+  let digits : Array[Char] = []
+  let places : Array[Int32] = []
   for i in start..<end {
     let c = chars[i]
     if c == '-' {
       continue
     }
-    guard hex_value(c) is Some(v) else {
-      raise Malformed(
-        at=i,
-        reason="\{c.to_string().escape()} is not a hexadecimal digit",
-      )
-    }
-    if digits >= 32 {
+    if digits.length() == 32 {
       raise Malformed(at=i, reason="more than 32 hexadecimal digits")
     }
-    if digits < 16 {
-      hi = (hi << 4) | v.to_uint64()
-    } else {
-      lo = (lo << 4) | v.to_uint64()
-    }
-    digits += 1
+    digits.push(c)
+    places.push(i)
   }
-  if digits != 32 {
-    raise Malformed(at=end, reason="\{digits} hexadecimal digits, not 32")
+  if digits.length() != 32 {
+    raise Malformed(
+      at=end,
+      reason="\{digits.length()} hexadecimal digits, not 32",
+    )
   }
-  { hi, lo, }
+  let bytes = @base16.decode(String::from_array(digits)) catch {
+    @moonbase.Bad(at~, char~) =>
+      raise Malformed(
+        at=places[at],
+        reason="\{char.to_string().escape()} is not a hexadecimal digit",
+      )
+    _ => raise Malformed(at=start, reason="not hexadecimal")
+  }
+  of16(bytes)
 }
 
 ///|

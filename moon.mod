@@ -33,6 +33,7 @@ source = "src"
 import {
   "moonbitstack/mooncrypt@0.5.0",
   "moonbitstack/moonseed@0.1.3",
+  "moonbitstack/moonbase@0.5.0",
 }
 
 preferred_target = "wasm-gc"
