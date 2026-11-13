@@ -71,7 +71,9 @@ c232ab00-9414-11ec-b3c8-9f6bdeced846`,
     no: "04",
     title: "Write it back",
     body: `<p><code>to_string</code> gives the canonical form. <code>hex</code> drops the
-      hyphens. <code>urn</code> adds the prefix. All three write lowercase.</p>`,
+      hyphens. <code>urn</code> adds the prefix. All three write lowercase. For the order
+      Windows and COM keep a GUID in, <code>bytes_le</code> writes the same 16 bytes with the
+      first three fields little-endian, and <code>Uuid::of_bytes_le</code> reads them back.</p>`,
     blocks: [
       {
         lang: "moonbit",

@@ -136,6 +136,32 @@ pub fn Uuid::hex(self : Uuid) -> String {
 }
 
 ///|
+/// The 16 bytes in the order Windows holds a GUID: the first three fields
+/// little-endian, the remaining ten as they are written. `of_bytes_le`
+/// reads them back.
+pub fn Uuid::bytes_le(self : Uuid) -> Bytes {
+  let be = self.bytes()
+  Bytes::makei(16, i => be[guid_order[i]])
+}
+
+///|
+/// The identifier from 16 bytes in that order: `bytes_le` backwards. The
+/// two byte orders differ only by swaps, so one table serves both.
+pub fn Uuid::of_bytes_le(bytes : BytesView) -> Uuid raise Refused {
+  if bytes.length() != 16 {
+    raise Size(want=16, got=bytes.length())
+  }
+  of16(Bytes::makei(16, i => bytes[guid_order[i]]))
+}
+
+///|
+/// Where each byte of the written form sits in the little-endian one: the
+/// time fields and the version come back to front, the rest line up.
+let guid_order : Array[Int32] = [
+  3, 2, 1, 0, 5, 4, 7, 6, 8, 9, 10, 11, 12, 13, 14, 15,
+]
+
+///|
 /// `urn:uuid:` and the canonical text, as RFC 9562 names an identifier.
 pub fn Uuid::urn(self : Uuid) -> String {
   "urn:uuid:" + self.to_string()
@@ -264,6 +290,18 @@ pub let nil : Uuid = { hi: 0UL, lo: 0UL, }
 ///|
 /// The max identifier, all ones.
 pub let max : Uuid = { hi: 0xFFFFFFFFFFFFFFFFUL, lo: 0xFFFFFFFFFFFFFFFFUL, }
+
+///|
+/// Whether this is the nil identifier.
+pub fn Uuid::is_nil(self : Uuid) -> Bool {
+  self == nil
+}
+
+///|
+/// Whether this is the max identifier.
+pub fn Uuid::is_max(self : Uuid) -> Bool {
+  self == max
+}
 
 ///|
 /// The namespaces RFC 9562 assigns for names that are domain names, URLs,

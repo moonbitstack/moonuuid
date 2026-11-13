@@ -69,6 +69,7 @@ pub struct Uuid {
   // private fields
 }
 pub fn Uuid::bytes(Self) -> Bytes
+pub fn Uuid::bytes_le(Self) -> Bytes
 pub fn Uuid::clock_seq(Self) -> Int32
 pub fn Uuid::compare(Self, Self) -> Int32
 pub fn Uuid::equal(Self, Self) -> Bool
@@ -76,9 +77,12 @@ pub fn Uuid::from_json(@json.Json, @json.JsonPath) -> Self raise @json.JsonDecod
 pub fn Uuid::hash(Self) -> Int32
 pub fn Uuid::hash_combine(Self, Hasher) -> Unit
 pub fn Uuid::hex(Self) -> String
+pub fn Uuid::is_max(Self) -> Bool
+pub fn Uuid::is_nil(Self) -> Bool
 pub fn Uuid::node(Self) -> Int64
 pub fn Uuid::not_equal(Self, Self) -> Bool
 pub fn Uuid::of_bytes(BytesView) -> Self raise Refused
+pub fn Uuid::of_bytes_le(BytesView) -> Self raise Refused
 pub fn Uuid::of_parts(UInt64, UInt64) -> Self
 pub fn Uuid::op_ge(Self, Self) -> Bool
 pub fn Uuid::op_gt(Self, Self) -> Bool

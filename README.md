@@ -78,6 +78,8 @@ assert_eq(
 
 `Uuid::of_bytes` and `Uuid::of_parts(hi, lo)` build one from 16 bytes or two 64-bit halves. Identifiers compare, hash and sort by their bytes.
 
+Windows and COM store a GUID with the first three fields little-endian: `id.bytes_le()` writes those 16 bytes and `Uuid::of_bytes_le` reads them back. `id.is_nil()` and `id.is_max()` recognise the two fixed identifiers.
+
 ## Fields
 
 | Method | Returns |
