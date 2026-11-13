@@ -77,6 +77,12 @@ jobs:
         run: |
           moon info --target all && git diff --exit-code
 
+      # One decision at a time is changed to a plausible mistake; a test has to
+      # notice every one of them.
+      - name: a broken decision is caught by a test
+        if: runner.os == 'Linux'
+        run: python3 scripts/mutation_check.py
+
   # The four implementations of RFC 9562 trade identifiers in both directions:
   # what one makes, the other three read, and the fields they report have to
   # agree. The identifiers are made in the run, not copied from a file.
