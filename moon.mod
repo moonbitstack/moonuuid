@@ -23,6 +23,13 @@ keywords = [
   "uuidv6",
   "uuidv7",
   "uuidv8",
+  "uuid-parser",
+  "uuid-generator",
+  "time-ordered",
+  "sortable-id",
+  "name-based",
+  "guid-format",
+  "little-endian",
   "moonbit",
 ]
 
