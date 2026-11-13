@@ -99,12 +99,17 @@ def main() -> int:
         )
 
     failures = []
-    shared = sorted(set.intersection(*[set(made[n]) for n in names]))
-    for label in shared:
-        values = {n: made[n][label] for n in names}
-        if len(set(values.values())) != 1:
-            failures.append("label %s differs: %s" % (label, values))
-    print("shared labels: %d, all equal" % len(shared) if not failures else "")
+    same = 0
+    for name in names[1:]:
+        shared = sorted(set(made["moonuuid"]) & set(made[name]))
+        for label in shared:
+            same += 1
+            if made[name][label] != made["moonuuid"][label]:
+                failures.append(
+                    "label %s: moonuuid %s, %s %s"
+                    % (label, made["moonuuid"][label], name, made[name][label])
+                )
+        print("%-9s shares %d labels with moonuuid" % (name, len(shared)))
 
     texts = sorted(
         {text for rows in made.values() for text in rows.values()}
@@ -138,8 +143,8 @@ def main() -> int:
     for failure in failures:
         print("FAIL " + failure)
     print(
-        "%d identifiers, %d texts, %d field comparisons, %d differences"
-        % (len(shared), len(to_read), comparisons, len(failures))
+        "%d identifiers compared value for value, %d texts, %d field comparisons, %d differences"
+        % (same, len(to_read), comparisons, len(failures))
     )
     return 1 if failures else 0
 
