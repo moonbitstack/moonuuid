@@ -15,6 +15,7 @@ from __future__ import annotations
 import html
 import json
 import re
+import sys
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parent.parent
@@ -528,11 +529,26 @@ def main() -> None:
         + ";\n"
     )
 
+    # Every item the package interface prints has to be on the page: a reader
+    # looks for what `moon info` showed them.
+    missing = []
+    for item in values + functions:
+        if f'data-name="{item["name"]}"' not in content:
+            missing.append(item["name"])
+    for owner in types + errors:
+        if f'data-name="{owner["name"]}"' not in content:
+            missing.append(owner["name"])
+        for method in owner["methods"]:
+            if f'id="{owner["name"]}.{method["name"]}"' not in content:
+                missing.append(f'{owner["name"]}.{method["name"]}')
+    if missing:
+        sys.exit("the page is missing: " + ", ".join(missing))
+
     OUT.parent.mkdir(parents=True, exist_ok=True)
     with open(OUT, "w", encoding="utf-8", newline="\n") as handle:
         handle.write(module)
 
-    print(f"api   <- {OUT.relative_to(REPO)}")
+    print(f"api   <- {OUT.relative_to(REPO)} ({len(values) + len(functions) + len(types) + len(errors)} entries)")
 
 
 if __name__ == "__main__":

@@ -64,7 +64,7 @@ fn describe(text : String) -> String raise @moonuuid.Refused {
 }
 ```
 
-`to_string()` writes the canonical lowercase form, `hex()` the 32 digits, `urn()` the URN, `bytes()` the 16 bytes. Ids compare, hash and sort by their bytes, and `ToJson` writes the canonical text.
+`to_string()` writes the canonical lowercase form, `hex()` the 32 digits, `urn()` the URN, `bytes()` the 16 bytes, and `bytes_le()` those bytes in the order Windows keeps a GUID. `is_nil()` and `is_max()` recognise the two fixed ids. Ids compare, hash and sort by their bytes, and `ToJson` writes the canonical text.
 
 ## Things that catch people out
 
