@@ -1,6 +1,6 @@
 name = "moonbitstack/moonuuid"
 
-version = "0.1.5"
+version = "0.2.0"
 
 readme = "README.md"
 
@@ -39,7 +39,7 @@ source = "src"
 
 import {
   "moonbitstack/mooncrypt@0.5.0",
-  "moonbitstack/moonseed@0.1.3",
+  "moonbitstack/moonseed@0.2.0",
   "moonbitstack/moonbase@0.5.0",
 }
 
