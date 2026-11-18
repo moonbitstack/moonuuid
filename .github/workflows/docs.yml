@@ -45,8 +45,10 @@ jobs:
           moon update
           moon build --target js --release src/examples/browser
           python3 scripts/gen_api.py
-          (cd site && npm install --no-audit --no-fund && npm run check && npm run build)
+          # The generator is what has to be current; the site build re-bundles the page's inline
+          # script, and its bytes follow whichever bundler version npm hands out that day.
           git diff --exit-code docs/api.html
+          (cd site && npm install --no-audit --no-fund && npm run check && npm run build)
 
       - name: configure pages
         uses: actions/configure-pages@v6
