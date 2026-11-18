@@ -73,7 +73,7 @@ pub fn Uuid::bytes_le(Self) -> Bytes
 pub fn Uuid::clock_seq(Self) -> Int32
 pub fn Uuid::compare(Self, Self) -> Int32
 pub fn Uuid::equal(Self, Self) -> Bool
-pub fn Uuid::from_json(@json.Json, @json.JsonPath) -> Self raise @json.JsonDecodeError
+pub fn Uuid::from_json(@json.Json, @json.DecodeContext) -> Self raise @json.JsonDecodeError
 pub fn Uuid::hash(Self) -> Int32
 pub fn Uuid::hash_combine(Self, Hasher) -> Unit
 pub fn Uuid::hex(Self) -> String
